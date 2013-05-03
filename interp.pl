@@ -19,7 +19,7 @@
 
 interpret(String, Interp) :-
   s(Interp_, String, []),
-  normal_form(Interp_, Interp).
+  bnf(Interp_, Interp).
 
 
 %------------------------------------------------------------------------------
