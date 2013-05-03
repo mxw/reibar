@@ -119,7 +119,7 @@ vc(np/P, DP, PP) --> dp(_, DP), pp(P, PP).
 % Determiner phrases.
 dp(Agr, D_) --> d_(Agr, D_).
 
-d_(Agr, PN) --> pn(Agr, PN).
+d_(Agr, PR) --> pr(Agr, PR).
 d_(Agr, D@NP) --> d(Agr, D), np(Agr, NP).
 
 % Noun phrases.
@@ -261,14 +261,14 @@ p(P, x^y^P@y@x) --> [P1, P2], {prep(P1, P2), atom_concat(P1, P2, P)}.
 %
 
 % Proper nouns.
-pn(sg/3, X) --> [X], {pn(X)}.
+pr(sg/3, X) --> [X], {pr(X)}.
 
-  pn(a).
-  pn(b).
-  pn(c).
-  pn(d).
-  pn(e).
-  pn(f).
+  pr(a).
+  pr(b).
+  pr(c).
+  pr(d).
+  pr(e).
+  pr(f).
 
 % Common nouns.
 n(sg/3, x^Sg@x) --> [Sg], {noun(Sg, _Pl)}.
