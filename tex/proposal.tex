@@ -1,0 +1,41 @@
+\documentclass[11pt]{article}
+\usepackage{cspset}
+
+\fancyhead[RO]{Max Wang}
+\fancyhead[LO]{Final Project Proposal}
+
+\title{CS 187---Final Project Proposal}
+\author{Max Wang}
+\date{May 1, 2013}
+
+\begin{document}
+
+\maketitle
+
+For the most part, I'd be interested in extending the collection of small
+systems we built in Prolog in the second half of the course, in the following
+ways:
+
+\begin{itemize}
+  \item Extend the syntax engine to handle pronouns, adjectives, adverbs, and
+    complementizers, and other things perhaps. This doesn't have direct
+    relevance to the rest of my proposed project, but I think the trees are
+    pretty.
+  \item Extend the semantics engine accordingly (perhaps merging it with the
+    tree generator and figuring out how best to refactor Prolog).
+  \item Make a basic user interface for specifying paradigms for new nouns and
+    verbs (i.e., sentences are parsed by the toplevel script, and anything not
+    in the dynamic lexicon files is added by asking the user for properties of
+    the word).
+  \item Create a question-answering system about user-submitted sentences,
+    e.g., if the sentence is "Frog's friends baked Toad a red cake.", answer
+    such questions as, "Whose friends?" or "What did Frog's friends bake?" or
+    "What was the cake like?"
+\end{itemize}
+
+The last item in particular is pretty open-ended, and seems like it would be
+the primary "product" of the project. I'd like some thoughts on what would be
+some good minimum specifications to achieve, but I like the exploratory
+direction this heads in.
+
+\end{document}
