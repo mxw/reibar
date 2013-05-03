@@ -219,16 +219,6 @@ v(_/_,  pastp, Asp, Sub, LF) --> [V], {verb(_,_,_,_,V,Asp,Fs), v_scf(V,Fs,Sub,LF
 %
 verb(F1, F2, F3, F4, F5, simp, Fs) :- verb(F1, F2, F3, F4, F5, Fs).
 
-  verb(bake, bakes, baked, baking, baked,   [nil, np, np/np]).
-  verb(give, gives, gave, giving, given,    [np/np, np/to]).
-  verb(go, goes, went, going, gone,         [nil]).
-  verb(live, lives, lived, living, lived,   [nil]).
-  verb(leave, leaves, left, leaving, left,  [nil, np]).
-  verb(meet, meets, met, meeting, met,      [np]).
-  verb(put, puts, put, putting, put,        [np/pp]).
-  verb(see, sees, saw, seeing, seen,        [nil, np]).
-  verb(support, supports, supported, supporting, supported, [np]).
-
 
 %------------------------------------------------------------------------------
 %
@@ -257,42 +247,20 @@ p(P, x^y^P@y@x) --> [P1, P2], {prep(P1, P2), atom_concat(P1, P2, P)}.
 
 %------------------------------------------------------------------------------
 %
-%  Nouns lexicon.
+%  Exported lexicons.
 %
 
-% Proper nouns.
-pr(sg/3, X) --> [X], {pr(X)}.
+:- ensure_loaded('lex/pr.pl')
+:- ensure_loaded('lex/noun.pl')
+:- ensure_loaded('lex/verb.pl')
+:- ensure_loaded('lex/adj.pl')
 
-  pr(a).
-  pr(b).
-  pr(c).
-  pr(d).
-  pr(e).
-  pr(f).
+% Proper nouns.
+pr(sg/3, X) --> X, {pr(X)}.
 
 % Common nouns.
 n(sg/3, x^Sg@x) --> [Sg], {noun(Sg, _Pl)}.
 n(pl/3, x^Sg@x) --> [Pl], {noun(Sg, Pl)}.
 
-  noun(table, tables).
-  noun(block, blocks).
-  noun(circle, circles).
-  noun(square, squares).
-  noun(parallelogram, parallelograms).
-  noun(triangle, triangles).
-
-
-%------------------------------------------------------------------------------
-%
-%  Adjectives lexicon.
-%
-
+% Adjectives.
 a(x^A@x) --> [A], {adj(A)}.
-
-  adj(blue).
-  adj(circular).
-  adj(green).
-  adj(red).
-  adj(square).
-  adj(triangular).
-  adj(yellow).
