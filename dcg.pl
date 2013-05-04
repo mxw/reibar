@@ -357,27 +357,39 @@ ap(ap(a_(At)), Ai) --> a(At, Ai).
 
 :- discontiguous(v/8).
 
+%% finite(?Tns)
+%
 % Verb tense finiteness.
+
 finite(pres).
 finite(pret).
 finite(Do) :- aux(_, Tns, dsup, Do, _, _, _), finite(Tns).
 
+%% aspect(?Gov)
+%
 % Verb aspect government.
+
 aspect(prog).
 aspect(perf).
 
+%% v_scf(+V, +Fs, ?Sub, -LF)
+%
 % Verb subcategorization frames.
+
 v_scf(_, Fs, aux,   _)         :- member(aux, Fs).
 v_scf(V, Fs, nil,   y^V@y)     :- member(nil, Fs).
 v_scf(V, Fs, np,    x^y^V@y@x) :- member(np, Fs).
 v_scf(V, Fs, np/X,  x^y^V@y@x) :- member(np/X, Fs).
 
+
+%% Auxiliary verbs.
 %
-% Auxiliary verbs.
+% aux(?Agr, ?Tns, ?Gov, -T, -I)
+% modal(-Pres, -Pret)
 %
 % We share the paradigm descriptions of `be' and `have' with the verb lexical
 % predicate, and additionally define modal auxiliaries.
-%
+
 aux(Agr, Tns, prog, X, _) --> v(Agr, Tns, prog, aux, v(X), _).
 aux(Agr, Tns, perf, X, _) --> v(Agr, Tns, perf, aux, v(X), _).
 aux(Agr, Tns, dsup, X, _) --> v(Agr, Tns, dsup, aux, v(X), _).
@@ -389,9 +401,12 @@ aux(_/_, pret, mod, X, _) --> [X], {modal(_, X)}.
   modal(shall, should).
   modal(will, would).
 
+
+%% Copular verb `be'.
 %
-% Copular verb `be'.
-%
+% b(-Agr, -Tns, -V)       Lexical paradigm for `be'.
+% b_scf(+V, -Sub, -LF)    Special `invisible' logical forms for `be'.
+
 v(Agr, Tns, prog, Sub, v(V), LF) --> [V], {b(Agr, Tns, V), b_scf(V, Sub, LF)}.
 
   b(_/_,  infin, be).
@@ -414,9 +429,12 @@ b_scf(_, a,   x^y^x@y).
 b_scf(_, pp,  x^y^x@y).
 b_scf(V, np,  x^y^V@y@x).
 
+
+%% v(?Agr, ?Tns, ?Gov, ?Sub, -T, -I)
 %
-% Main verbs.
-%
+% Main verbs.  Features include agreement (number and person), tense,
+% governance (modality, aspect, etc.), and subcategorization frame.
+
 v(Agr, Tns, Sub, Vt, LF) --> v(Agr, Tns, _, Sub, Vt, LF).
 v(_/_,  infin, Gov, Sub, v(V), LF) --> [V], {verb(V,_,_,_,_,Gov,Fs), v_scf(V,Fs,Sub,LF)}.
 v(sg/1, pres,  Gov, Sub, v(V), LF) --> [V], {verb(V,_,_,_,_,Gov,Fs), v_scf(V,Fs,Sub,LF)}.
@@ -430,9 +448,7 @@ v(_/_,  pastp, Gov, Sub, v(V), LF) --> [V], {verb(_,_,_,_,V,Gov,Fs), v_scf(V,Fs,
   verb(do, does, did, doing, done,  dsup, [aux, np]).
   verb(have, has, had, having, had, perf, [aux, np]).
 
-%
-% Main verb lexicon.
-%
+% Lexicon shorthand.
 verb(F1, F2, F3, F4, F5, simp, Fs) :- verb(F1, F2, F3, F4, F5, Fs).
 
 
@@ -468,7 +484,7 @@ p(P, p(P), x^y^P@y@x) --> [P1, P2], {prep(P1, P2), atom_concat(P1, P2, P)}.
 
 %------------------------------------------------------------------------------
 %
-%  Imported lexicons.
+%  Exported lexicons.
 %
 
 :- ensure_loaded('lex/pr.pl').
