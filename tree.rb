@@ -39,7 +39,7 @@ def qtree_convert(token, labels)
     tok, label = token.split('/')
 
     # Determine which end of the arrow this node is at.
-    if label.to_f.zero?
+    if label.to_i.zero?
       tok, label = "$#{label}$", tok
       type = 'dst'
     else

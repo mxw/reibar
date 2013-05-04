@@ -43,7 +43,7 @@ c_reset :- b_setval(counter, 0).
 %
 % Increment counter with result N.
 
-c_incr(N) :-
+c_incr(N1) :-
   b_getval(counter, N),
   N1 is N + 1,
   b_setval(counter, N1).
