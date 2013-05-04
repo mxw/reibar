@@ -322,6 +322,7 @@ vv(V_t, V_i, VVt, VVi) -->
 
 dp(Agr, dp(D_t), D_i) --> d_(Agr, D_t, D_i).
 
+
 %% d_(+Agr, -T, -I)
 %
 % Determiner bars.
@@ -329,11 +330,13 @@ dp(Agr, dp(D_t), D_i) --> d_(Agr, D_t, D_i).
 d_(Agr, d_(np(n_(PRt))), PRi) --> pr(Agr, PRt, PRi).
 d_(Agr, d_(Dt, NPt), Di@NPi) --> d(Agr, Dt, Di), np(Agr, NPt, NPi).
 
+
 %% np(+Agr, -T, -I)
 %
 % Noun phrases.
 
 np(Agr, np(N_t), N_i) --> n_(Agr, N_t, N_i).
+
 
 %% n_(+Agr, -T, -I)
 %
@@ -345,6 +348,7 @@ n_(Agr, N_t, N_i) -->
   n(Agr, Nt, Ni),
   {and(Ni, APi, NA)},
   nn(Agr, n_(APt, Nt), NA, N_t, N_i).
+
 
 %% nn(+Agr, +N_t, +N_i, -T, -I)
 %
