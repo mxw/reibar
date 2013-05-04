@@ -471,7 +471,7 @@ p(P, p(P), x^y^P@y@x) --> [P1, P2], {prep(P1, P2), atom_concat(P1, P2, P)}.
 :- ensure_loaded('lex/adj.pl').
 
 % Proper nouns.
-pr(sg/3, n(X), X) --> X, {pr(X)}.
+pr(sg/3, n(PR), PR) --> {pr(X), atomic_list_concat(X, ' ', PR)}, X.
 
 % Common nouns.
 n(sg/3, n(Sg), x^Sg@x) --> [Sg], {noun(Sg, _Pl)}.
