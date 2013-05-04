@@ -453,9 +453,14 @@ p(P, p(P), x^y^P@y@x) --> [P], {prep(P)}.
 p(P, p(P), x^y^P@y@x) --> [P1, P2], {prep(P1, P2), atom_concat(P1, P2, P)}.
 
   prep(above).
+  prep(at).
   prep(below).
+  prep(by).
+  prep(of).
   prep(on).
+  prep(to).
   prep(under).
+  prep(with).
   prep(left, of).
   prep(right, of).
 
