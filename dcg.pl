@@ -32,6 +32,8 @@ and(X, Y, x^and@(X@x)@(Y@x)).
 %
 %  Complementizer stack.
 %
+%  We use DCG rules for push and pop, and regular predicates elsewhere.
+%
 
 %% c_reset.
 %
@@ -72,18 +74,20 @@ cstack_depth(N) :-
 %
 % Push a complementizer onto the stack.
 
-cstack_push(CType, LF, N, Data) :-
-  c_incr(N),
-  b_getval(cstack, CStack),
-  b_setval(cstack, [c(CType, LF, N, Data) | CStack]).
+cstack_push(CType, LF, N, Data) --> [],
+  { c_incr(N),
+    b_getval(cstack, CStack),
+    b_setval(cstack, [c(CType, LF, N, Data) | CStack])
+  }.
 
 %% cstack_pop(-CType, -LF, -N, -Gov)
 %
 % Pop a complementizer off the stack.
 
-cstack_pop(CType, LF, N, Data) :-
-  b_getval(cstack, [c(CType, LF, N, Data) | CStack]),
-  b_setval(cstack, CStack).
+cstack_pop(CType, LF, N, Data) --> [],
+  { b_getval(cstack, [c(CType, LF, N, Data) | CStack]),
+    b_setval(cstack, CStack)
+  }.
 
 
 %------------------------------------------------------------------------------
@@ -111,17 +115,15 @@ c_(c_(IPt), IPi) --> ip(IPt, IPi).
 % Auxiliary complementizer.
 c_(c_(c(N/Aux), IPt), IPi) -->
   aux(Agr, Tns, Gov, Aux, LF),
-  { finite(Tns),
-    cstack_push(aux, LF, N, Tns/Gov)
-  },
+  { finite(Tns) },
+  cstack_push(aux, LF, N, Tns/Gov),
   ip(Agr, Gov, IPt, IPi).
 
 % Main verb complementizer (be/have).
 c_(c_(c(N/V), IPt), IPi) -->
   v(Agr, Tns, Gov, Sub, v(V), LF),
-  { finite(Tns), aspect(Gov),
-    cstack_push(verb, LF, N, Tns/Sub)
-  },
+  { finite(Tns), aspect(Gov) },
+  cstack_push(verb, LF, N, Tns/Sub),
   ip(Agr, simp, IPt, IPi).
 
 
@@ -134,7 +136,7 @@ relp(Agr, NPi, cp(C_t), C_i) --> rel_(Agr, NPi, C_t, C_i).
 
 rel_(Agr, NPi, c_(c(N/RP), IPt), IPi) -->
   rp(RP),
-  { cstack_push(rel, NPi, N, RP) },
+  cstack_push(rel, NPi, N, RP),
   ip(Agr, _, IPt, IPi).
 
 
@@ -152,17 +154,17 @@ rel_(Agr, NPi, c_(c(N/RP), IPt), IPi) -->
 ip(ip(DPt, I_t), I_i@DPi) -->
   dp(Agr, DPt, DPi),
   i_(Agr, Tns, _, I_t, I_i),
-  {finite(Tns)}.
+  { finite(Tns) }.
 
 ip(Agr, Gov, ip(DPt, I_t), I_i@DPi) -->
   dp(Agr, DPt, DPi),
   i_(_, _, Gov, I_t, I_i).
 
 ip(Agr, _, ip(dp(t/N), I_t), IPi) -->
-  {cstack_pop(rel, NPi, N, _)},
+  cstack_pop(rel, NPi, N, _),
   i_(Agr, Tns, _, I_t, I_i),
-  {and(NPi, I_i, IPi)},
-  {finite(Tns)}.
+  { and(NPi, I_i, IPi) },
+  { finite(Tns) }.
 
 i_(Agr, Tns, Gov, i_(i(Tns), IIt), IIi) --> ii(Agr, Tns, Gov, IIt, IIi).
 
@@ -180,11 +182,11 @@ ii(Agr, Tns, simp, VPt, VPi) --> vp(Agr, Tns, VPt, VPi).
 
 mp(Agr, Tns, mp(m(Aux), MCt), MCi) -->
   aux(Agr, Tns, mod, Aux, _),
-  {\+ cstack_pop(aux, _, _, _/mod)},
+  \+ cstack_pop(aux, _, _, _/mod),
   mc(MCt, MCi).
 
 mp(_, Tns, mp(m(t/N), MCt), MCi) -->
-  {cstack_pop(aux, _, N, Tns/mod)},
+  cstack_pop(aux, _, N, Tns/mod),
   mc(MCt, MCi).
 
 mc(PerfPt, PerfPi) --> perfp(_, infin, PerfPt, PerfPi).
@@ -199,11 +201,11 @@ mc(VPt, VPi) --> vp(_, infin, VPt, VPi).
 
 perfp(Agr, Tns, perfp(perf(Aux), PerfCt), PerfCi) -->
   aux(Agr, Tns, perf, Aux, _),
-  {\+ cstack_pop(aux, _, _, _/perf)},
+  \+ cstack_pop(aux, _, _, _/perf),
   perfc(PerfCt, PerfCi).
 
 perfp(_, Tns, perfp(perf(t/N), PerfCt), PerfCi) -->
-  {cstack_pop(aux, _, N, Tns/perf)},
+  cstack_pop(aux, _, N, Tns/perf),
   perfc(PerfCt, PerfCi).
 
 perfc(ProgPt, ProgPi) --> progp(_, pastp, ProgPt, ProgPi).
@@ -216,11 +218,11 @@ perfc(VPt, VPi) --> vp(_, pastp, VPt, VPi).
 
 progp(Agr, Tns, progp(prog(Aux), VPt), VPi) -->
   aux(Agr, Tns, prog, Aux, _),
-  {\+ cstack_pop(aux, _, _, _/prog)},
+  \+ cstack_pop(aux, _, _, _/prog),
   vp(_, presp, VPt, VPi).
 
 progp(_, Tns, progp(prog(t/N), VPt), VPi) -->
-  {cstack_pop(aux, _, N, Tns/prog)},
+  cstack_pop(aux, _, N, Tns/prog),
   vp(_, presp, VPt, VPi).
 
 
@@ -230,11 +232,11 @@ progp(_, Tns, progp(prog(t/N), VPt), VPi) -->
 
 dsup(Agr, Do, VPt, VPi) -->
   aux(Agr, _, dsup, Do, _),
-  {\+ cstack_pop(aux, _, _, _/dsup)},
+  \+ cstack_pop(aux, _, _, _/dsup),
   vp(_, infin, VPt, VPi).
 
 dsup(_, t/N, VPt, VPi) -->
-  {cstack_pop(aux, _, N, _/dsup)},
+  cstack_pop(aux, _, N, _/dsup),
   vp(_, infin, VPt, VPi).
 
 
@@ -249,9 +251,9 @@ dsup(_, t/N, VPt, VPi) -->
 
 vopt(Agr, Tns, Sub, Vt, Vi) -->
   v(Agr, Tns, Sub, Vt, Vi),
-  {\+ cstack_pop(verb, _, _, _)}.
+  \+ cstack_pop(verb, _, _, _).
 vopt(_, Tns, Sub, v(t/N), Vi) -->
-  {cstack_pop(verb, Vi, N, Tns/Sub)}.
+  cstack_pop(verb, Vi, N, Tns/Sub).
 
 
 %% vp(+Agr, -Tns, -T, -I)
@@ -264,7 +266,7 @@ vp(Agr, Tns, vp(V_t), V_i) --> v_(Agr, Tns, V_t, V_i).
 vp(Agr, Tns, vp(v_(v(N/v), vp(Spec, V_t))), V_i) -->
   v(Agr, Tns, Sub, v(V), Vi),
   vc(Sub, Spec, Comp, DP, PP),
-  {c_incr(N)},
+  { c_incr(N) },
   vv(v_(v(V/N), Comp), x^PP@(Vi@DP@x), V_t, V_i).
 
 
@@ -293,7 +295,7 @@ v_(Agr, Tns, V_t, V_i) -->
 % direct and indirect objects.
 
 vc(np/np, Spec, Comp, DP, P@IO) -->
-  {p(to, _, P, _, _)},
+  { p(to, _, P, _, _) },
   dp(_, Spec, IO), dp(_, Comp, DP).
 vc(np/pp, Spec, Comp, DP, PP) -->
   dp(_, Spec, DP), pp(Comp, PP).
@@ -346,7 +348,7 @@ n_(Agr, N_t, N_i) --> n(Agr, Nt, Ni), nn(Agr, n_(Nt), Ni, N_t, N_i).
 n_(Agr, N_t, N_i) -->
   ap(APt, APi),
   n(Agr, Nt, Ni),
-  {and(Ni, APi, NA)},
+  { and(Ni, APi, NA) },
   nn(Agr, n_(APt, Nt), NA, N_t, N_i).
 
 
@@ -358,7 +360,7 @@ n_(Agr, N_t, N_i) -->
 nn(_, N_t, N_i, N_t, N_i) --> [].
 nn(_, N_t, N_i, NNt, NNi) -->
   pp(PPt, PPi),
-  {and(N_i, PPi, And)},
+  { and(N_i, PPi, And) },
   nn(_, n_(N_t, PPt), And, NNt, NNi).
 nn(Agr, N_t, N_i, n_(N_t, CPt), CPi) --> relp(Agr, N_i, CPt, CPi).
 
