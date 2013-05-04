@@ -250,10 +250,10 @@ p(P, x^y^P@y@x) --> [P1, P2], {prep(P1, P2), atom_concat(P1, P2, P)}.
 %  Exported lexicons.
 %
 
-:- ensure_loaded('lex/pr.pl')
-:- ensure_loaded('lex/noun.pl')
-:- ensure_loaded('lex/verb.pl')
-:- ensure_loaded('lex/adj.pl')
+:- ensure_loaded('lex/pr.pl').
+:- ensure_loaded('lex/noun.pl').
+:- ensure_loaded('lex/verb.pl').
+:- ensure_loaded('lex/adj.pl').
 
 % Proper nouns.
 pr(sg/3, X) --> X, {pr(X)}.
