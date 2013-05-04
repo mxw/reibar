@@ -117,14 +117,14 @@ c_(c_(c(N/Aux), IPt), IPi) -->
   aux(Agr, Tns, Gov, Aux, LF),
   { finite(Tns) },
   cstack_push(aux, LF, N, Tns/Gov),
-  ip(Agr, Gov, IPt, IPi).
+  ip(Agr, _, Gov, IPt, IPi).
 
 % Main verb complementizer (be/have).
 c_(c_(c(N/V), IPt), IPi) -->
   v(Agr, Tns, Gov, Sub, v(V), LF),
   { finite(Tns), aspect(Gov) },
   cstack_push(verb, LF, N, Tns/Sub),
-  ip(Agr, simp, IPt, IPi).
+  ip(Agr, _, simp, IPt, IPi).
 
 
 %% relp(+NPi, -T, -I)
@@ -137,7 +137,8 @@ relp(Agr, NPi, cp(C_t), C_i) --> rel_(Agr, NPi, C_t, C_i).
 rel_(Agr, NPi, c_(c(N/RP), IPt), IPi) -->
   rp(RP),
   cstack_push(rel, NPi, N, RP),
-  ip(Agr, _, IPt, IPi).
+  ip(Agr, Tns, _, IPt, IPi),
+  { finite(Tns) }.
 
 
 %------------------------------------------------------------------------------
@@ -156,15 +157,15 @@ ip(ip(DPt, I_t), I_i@DPi) -->
   i_(Agr, Tns, _, I_t, I_i),
   { finite(Tns) }.
 
-ip(Agr, Gov, ip(DPt, I_t), I_i@DPi) -->
+ip(Agr, Tns, Gov, ip(DPt, I_t), I_i@DPi) -->
   dp(Agr, DPt, DPi),
-  i_(_, _, Gov, I_t, I_i).
+  i_(_, Tns, Gov, I_t, I_i).
 
-ip(Agr, _, ip(dp(t/N), I_t), IPi) -->
+% Relative clause with subject gap.
+ip(Agr, Tns, _, ip(dp(t/N), I_t), IPi) -->
   cstack_pop(rel, NPi, N, _),
   i_(Agr, Tns, _, I_t, I_i),
-  { and(NPi, I_i, IPi) },
-  { finite(Tns) }.
+  { and(NPi, I_i, IPi) }.
 
 i_(Agr, Tns, Gov, i_(i(Tns), IIt), IIi) --> ii(Agr, Tns, Gov, IIt, IIi).
 
@@ -285,6 +286,13 @@ v_(Agr, Tns, V_t, V_i) -->
   vopt(Agr, Tns, a, Vt, Vi),
   ap(APt, APi),
   vv(v_(Vt, APt), Vi@APi, V_t, V_i).
+
+% Relative clause with complement gap.
+v_(Agr, Tns, VVt, VVi) -->
+  v(Agr, Tns, np, Vt, Vi),
+  cstack_pop(rel, NPi, N, _),
+  { and(NPi, Vi, V_i) },
+  vv(v_(Vt, dp(t/N)), V_i, VVt, VVi).
 
 
 %% vc(+Sub, -Spec, -Comp, -DP, -PP)
