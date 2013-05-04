@@ -14,7 +14,6 @@
 
 :- module(betanf, [
      bnf/2,
-     test/2,
      op(950,  yfx, @),    % application
      op(970,  xfy, ^),    % abstraction
      op(100,  xfx, ::)    % renamed variable
