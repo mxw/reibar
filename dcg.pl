@@ -330,7 +330,7 @@ dp(Agr, dp(D_t), D_i) --> d_(Agr, D_t, D_i).
 %
 % Determiner bars.
 
-d_(Agr, d_(np(PRt)), PRi) --> pr(Agr, PRt, PRi).
+d_(Agr, d_(np(n_(PRt))), PRi) --> pr(Agr, PRt, PRi).
 d_(Agr, d_(Dt, NPt), Di@NPi) --> d(Agr, Dt, Di), np(Agr, NPt, NPi).
 
 %% np(+Agr, -T, -I)
