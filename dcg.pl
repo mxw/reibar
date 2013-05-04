@@ -125,6 +125,19 @@ c_(c_(c(N/V), IPt), IPi) -->
   ip(Agr, simp, IPt, IPi).
 
 
+%% relp(+NPi, -T, -I)
+%
+% Relative clause.  Functions syntactically as a complementizer phrase, but we
+% use a separate predicate.
+
+relp(Agr, NPi, cp(C_t), C_i) --> rel_(Agr, NPi, C_t, C_i).
+
+rel_(Agr, NPi, c_(c(N/RP), IPt), IPi) -->
+  rp(RP),
+  { cstack_push(rel, NPi, N, RP) },
+  ip(Agr, _, IPt, IPi).
+
+
 %------------------------------------------------------------------------------
 %
 %  Inflection grammar.
@@ -223,23 +236,6 @@ dsup(Agr, Do, VPt, VPi) -->
 dsup(_, t/N, VPt, VPi) -->
   {cstack_pop(aux, _, N, _/dsup)},
   vp(_, infin, VPt, VPi).
-
-
-%------------------------------------------------------------------------------
-%
-%  Relative clause grammar.
-%
-
-%% relp(+NPi, -T, -I)
-%
-% Relative clause.  Functions syntactically as a complementizer phrase.
-
-relp(Agr, NPi, cp(C_t), C_i) --> rel_(Agr, NPi, C_t, C_i).
-
-rel_(Agr, NPi, c_(c(N/RP), IPt), IPi) -->
-  rp(RP),
-  { cstack_push(rel, NPi, N, RP) },
-  ip(Agr, _, IPt, IPi).
 
 
 %------------------------------------------------------------------------------
@@ -352,7 +348,8 @@ n_(Agr, N_t, N_i) -->
 
 %% nn(+Agr, +N_t, +N_i, -T, -I)
 %
-% Noun adjuncts.  Adjoins prepositional phrases to noun bars.
+% Noun adjuncts.  Adjoins prepositional phrases and relative clauses to noun
+% bars.
 
 nn(_, N_t, N_i, N_t, N_i) --> [].
 nn(_, N_t, N_i, NNt, NNi) -->
