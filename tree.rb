@@ -122,13 +122,10 @@ end
 
 # LaTeX header/footer.
 PREAMBLE = %w{
-	\documentclass{article}
-  \usepackage{geometry}
+  \documentclass[tikz,border=1cm]{standalone}
   \usepackage[T1]{fontenc}
   \usepackage[english]{babel}
-  \usepackage{tikz}
   \usepackage{tikz-qtree}
-  \pagestyle{empty}
   \begin{document}
 } << ''
 
@@ -138,11 +135,9 @@ EPILOGUE = [''] + %w{
 
 # Wrap trees.
 trees.map! do |qtree|
-  [ '\begin{center}',
-    '\begin{tikzpicture}',
+  [ '\begin{tikzpicture}',
     qtree,
     '\end{tikzpicture}',
-    '\end{center}',
   ]
 end
 
