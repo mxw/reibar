@@ -265,7 +265,8 @@ v_(Agr, Tns, V_t, V_i) -->
 % specifier and complement in the tree; DP and PP are the logical forms of the
 % direct and indirect objects.
 
-vc(np/np, Spec, Comp, DP, (x^y^to@y@x)@IO) -->
+vc(np/np, Spec, Comp, DP, P@IO) -->
+  {p(to, _, P, _, _)},
   dp(_, Spec, IO), dp(_, Comp, DP).
 vc(np/pp, Spec, Comp, DP, PP) -->
   dp(_, Spec, DP), pp(Comp, PP).
