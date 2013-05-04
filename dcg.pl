@@ -60,6 +60,14 @@ cstack_init :- c_reset, b_setval(cstack, []).
 
 cstack_empty :- b_getval(cstack, []).
 
+%% cstack_depth(-N)
+%
+% N is the depth of the stack.
+
+cstack_depth(N) :-
+  b_getval(cstack, CStack),
+  length(CStack, N).
+
 %% cstack_push(+CType, +LF, -N, +Gov)
 %
 % Push a complementizer onto the stack.
@@ -137,6 +145,12 @@ ip(Agr, Gov, ip(DPt, I_t), I_i@DPi) -->
   dp(Agr, DPt, DPi),
   i_(_, _, Gov, I_t, I_i).
 
+ip(Agr, _, ip(dp(t/N), I_t), IPi) -->
+  {cstack_pop(rel, NPi, N, _)},
+  i_(Agr, Tns, _, I_t, I_i),
+  {and(NPi, I_i, IPi)},
+  {finite(Tns)}.
+
 i_(Agr, Tns, Gov, i_(i(Tns), IIt), IIi) --> ii(Agr, Tns, Gov, IIt, IIi).
 
 ii(Agr, Tns, mod,  VPt, VPi) --> mp(Agr, Tns, VPt, VPi).
@@ -209,6 +223,23 @@ dsup(Agr, Do, VPt, VPi) -->
 dsup(_, t/N, VPt, VPi) -->
   {cstack_pop(aux, _, N, _/dsup)},
   vp(_, infin, VPt, VPi).
+
+
+%------------------------------------------------------------------------------
+%
+%  Relative clause grammar.
+%
+
+%% relp(+NPi, -T, -I)
+%
+% Relative clause.  Functions syntactically as a complementizer phrase.
+
+relp(Agr, NPi, cp(C_t), C_i) --> rel_(Agr, NPi, C_t, C_i).
+
+rel_(Agr, NPi, c_(c(N/RP), IPt), IPi) -->
+  rp(RP),
+  { cstack_push(rel, NPi, N, RP) },
+  ip(Agr, _, IPt, IPi).
 
 
 %------------------------------------------------------------------------------
@@ -312,22 +343,23 @@ np(Agr, np(N_t), N_i) --> n_(Agr, N_t, N_i).
 %
 % Noun bars.
 
-n_(Agr, N_t, N_i) --> n(Agr, Nt, Ni), nn(n_(Nt), Ni, N_t, N_i).
+n_(Agr, N_t, N_i) --> n(Agr, Nt, Ni), nn(Agr, n_(Nt), Ni, N_t, N_i).
 n_(Agr, N_t, N_i) -->
   ap(APt, APi),
   n(Agr, Nt, Ni),
   {and(Ni, APi, NA)},
-  nn(n_(APt, Nt), NA, N_t, N_i).
+  nn(Agr, n_(APt, Nt), NA, N_t, N_i).
 
-%% nn(+N_t, +N_i, -T, -I)
+%% nn(+Agr, +N_t, +N_i, -T, -I)
 %
 % Noun adjuncts.  Adjoins prepositional phrases to noun bars.
 
-nn(N_t, N_i, N_t, N_i) --> [].
-nn(N_t, N_i, NNt, NNi) -->
+nn(_, N_t, N_i, N_t, N_i) --> [].
+nn(_, N_t, N_i, NNt, NNi) -->
   pp(PPt, PPi),
   {and(N_i, PPi, And)},
-  nn(n_(N_t, PPt), And, NNt, NNi).
+  nn(_, n_(N_t, PPt), And, NNt, NNi).
+nn(Agr, N_t, N_i, n_(N_t, CPt), CPi) --> relp(Agr, N_i, CPt, CPi).
 
 
 %------------------------------------------------------------------------------
@@ -503,3 +535,14 @@ p(P, p(P), x^y^P@y@x) --> [P1, P2], {prep(P1, P2), atom_concat(P1, P2, P)}.
   prep(with).
   prep(left, of).
   prep(right, of).
+
+
+%------------------------------------------------------------------------------
+%
+%  Pro-forms lexicon.
+%
+
+% Relative pronouns.
+rp(RP) --> [RP], {rpron(RP)}.
+
+  rpron(that).
