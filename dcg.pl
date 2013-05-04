@@ -104,7 +104,7 @@ c_(c_(IPt), IPi) --> ip(IPt, IPi).
 c_(c_(c(N/Aux), IPt), IPi) -->
   aux(Agr, Tns, Gov, Aux, LF),
   { finite(Tns),
-    cstack_push(aux, LF, N, Gov)
+    cstack_push(aux, LF, N, Tns/Gov)
   },
   ip(Agr, Gov, IPt, IPi).
 
@@ -153,11 +153,11 @@ ii(Agr, Tns, simp, VPt, VPi) --> vp(Agr, Tns, VPt, VPi).
 
 mp(Agr, Tns, mp(m(Aux), MCt), MCi) -->
   aux(Agr, Tns, mod, Aux, _),
-  {\+ cstack_pop(aux, _, _, mod)},
+  {\+ cstack_pop(aux, _, _, _/mod)},
   mc(MCt, MCi).
 
-mp(_, _, mp(m(t/N), MCt), MCi) -->
-  {cstack_pop(aux, _, N, mod)},
+mp(_, Tns, mp(m(t/N), MCt), MCi) -->
+  {cstack_pop(aux, _, N, Tns/mod)},
   mc(MCt, MCi).
 
 mc(PerfPt, PerfPi) --> perfp(_, infin, PerfPt, PerfPi).
@@ -172,11 +172,11 @@ mc(VPt, VPi) --> vp(_, infin, VPt, VPi).
 
 perfp(Agr, Tns, perfp(perf(Aux), PerfCt), PerfCi) -->
   aux(Agr, Tns, perf, Aux, _),
-  {\+ cstack_pop(aux, _, _, perf)},
+  {\+ cstack_pop(aux, _, _, _/perf)},
   perfc(PerfCt, PerfCi).
 
-perfp(_, _, perfp(perf(t/N), PerfCt), PerfCi) -->
-  {cstack_pop(aux, _, N, perf)},
+perfp(_, Tns, perfp(perf(t/N), PerfCt), PerfCi) -->
+  {cstack_pop(aux, _, N, Tns/perf)},
   perfc(PerfCt, PerfCi).
 
 perfc(ProgPt, ProgPi) --> progp(_, pastp, ProgPt, ProgPi).
@@ -189,11 +189,11 @@ perfc(VPt, VPi) --> vp(_, pastp, VPt, VPi).
 
 progp(Agr, Tns, progp(prog(Aux), VPt), VPi) -->
   aux(Agr, Tns, prog, Aux, _),
-  {\+ cstack_pop(aux, _, _, prog)},
+  {\+ cstack_pop(aux, _, _, _/prog)},
   vp(_, presp, VPt, VPi).
 
-progp(_, _, progp(prog(t/N), VPt), VPi) -->
-  {cstack_pop(aux, _, N, prog)},
+progp(_, Tns, progp(prog(t/N), VPt), VPi) -->
+  {cstack_pop(aux, _, N, Tns/prog)},
   vp(_, presp, VPt, VPi).
 
 
@@ -203,11 +203,11 @@ progp(_, _, progp(prog(t/N), VPt), VPi) -->
 
 dsup(Agr, Do, VPt, VPi) -->
   aux(Agr, _, dsup, Do, _),
-  {\+ cstack_pop(aux, _, _, dsup)},
+  {\+ cstack_pop(aux, _, _, _/dsup)},
   vp(_, infin, VPt, VPi).
 
 dsup(_, t/N, VPt, VPi) -->
-  {cstack_pop(aux, _, N, dsup)},
+  {cstack_pop(aux, _, N, _/dsup)},
   vp(_, infin, VPt, VPi).
 
 
@@ -360,6 +360,7 @@ ap(ap(a_(At)), Ai) --> a(At, Ai).
 % Verb tense finiteness.
 finite(pres).
 finite(pret).
+finite(Do) :- aux(_, Tns, dsup, Do, _, _, _), finite(Tns).
 
 % Verb aspect government.
 aspect(prog).
