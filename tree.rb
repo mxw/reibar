@@ -40,14 +40,17 @@ def qtree_convert(token, labels)
 
     # Determine which end of the arrow this node is at.
     if label.to_i.zero?
-      tok, label = "$#{label}$", tok
+      tok, label = label, tok
       type = 'dst'
     else
       type = 'src'
     end
 
-    # Give the node a less exotic label.
-    labels[label] ||= labels[:label].succ!
+    # Italicize traces and light verbs.
+    tok = "$#{tok}$" if tok.size == 1
+
+    # Give the node an alphabetic label.
+    labels[label] ||= labels[:label].succ!.dup
 
     # Output a qtree node.
     " \\node(#{labels[label]} #{type}){#{tok}};"
@@ -87,7 +90,7 @@ trees = IO.popen(swipl, :err => [:child, :out]) do |io|
 
     # Q-tree-ificate the tree outputs.
     qtree = s.scan(re).inject('\Tree') do |qtree, token|
-      qtree << qtree_convert(token.gsub('_', "$'$"), labels)
+      qtree << qtree_convert(token, labels)
     end
 
     labels.delete :label
