@@ -52,7 +52,7 @@ def qtree_convert(token, labels)
     # Output a qtree node.
     " \\node(#{labels[label]} #{type}){#{tok}};"
   else
-    ' ' + token
+    ' {' + token + '}'
   end
 end
 
@@ -80,7 +80,7 @@ trees = IO.popen(swipl, :err => [:child, :out]) do |io|
 
   trees.map do |s|
     # Regexp for tokenizing the tree.
-    re = /i\(\w+\)|\w+\(|\)|[\w\/\.]+/
+    re = /i\(\w+\)|\w+\(|\)|[\w\/. ]+/
 
     # Hash of head movement source/dest labels.
     labels = {label: '`'}
