@@ -25,11 +25,24 @@ def qtree_convert(token, labels)
 
   # Lexical categories.
   if token.end_with? '('
-    ' [.' + token.chop.capitalize.gsub('p', 'P')
+    tok = token.chop
+
+    # Simplified category.
+    if token.start_with? '*'
+      tok = tok[1..-1] + ' \edge[roof];'
+    end
+
+    ' [.' + tok.capitalize.gsub('p', 'P')
+
+  # Special-case tense.
   elsif token.start_with? 'i('
     ' [.I {[' + token[2...-1] + ']} ]'
+
+  # End-of-X.
   elsif token == ')'
     ' ]'
+
+  # Possessive head.
   elsif token == 's'
     ' {\'s}'
 
@@ -82,8 +95,12 @@ trees = IO.popen(swipl, :err => [:child, :out]) do |io|
   puts trees
 
   trees.map do |s|
+    # Simplify DP's.
+    s.gsub!(/dp\(d_\(np\(n_\(n\(([\w\/. ]+)\)\)\)\)\)/, '*dp(\1)')
+    s.gsub!(/dp\(d_\(d\(([\w\/. ]+)\),\s*np\(n_\(n\(([\w\/. ]+)\)\)\)\)\)/, '*dp(\1 \2)')
+
     # Regexp for tokenizing the tree.
-    re = /i\(\w+\)|\w+\(|\)|[\w\/. ]+/
+    re = /i\(\w+\)|[\w*]+\(|\)|[\w\/. ]+/
 
     # Hash of head movement source/dest labels.
     labels = {label: '`'}
