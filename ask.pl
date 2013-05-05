@@ -24,4 +24,5 @@ talk :-
   format('Reduced:    ~p~n', [Interp]),
   notation(Interp, Simple),
   format('Simplified: ~p~n', [Simple]),
-  talk.
+  gen(Simple, Scoped),
+  format('Scoped:     ~p~n~n', [Scoped]).
