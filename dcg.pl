@@ -266,9 +266,9 @@ vp(Agr, Tns, vp(V_t), V_i) --> v_(Agr, Tns, V_t, V_i).
 
 vp(Agr, Tns, vp(v_(v(N/v), vp(Spec, V_t))), V_i) -->
   v(Agr, Tns, Sub, v(V), Vi),
-  vc(Sub, Spec, Comp, DP, PP),
+  vc(Sub, Vi, Spec, Comp, VCi),
   { c_incr(N) },
-  vv(v_(v(V/N), Comp), x^PP@(Vi@DP@x), V_t, V_i).
+  vv(v_(v(V/N), Comp), VCi, V_t, V_i).
 
 
 %% v_(+Agr, -Tns, -T, -I)
@@ -299,16 +299,28 @@ v_(Agr, Tns, VVt, VVi) -->
 %
 % Verb complements.  Used for verbs with three theta roles in order to properly
 % generate the syntax tree and handle synonymity.  Spec and Comp are the
-% specifier and complement in the tree; DP and PP are the logical forms of the
-% direct and indirect objects.
+% specifier and complement in the tree; VC is the logical form of the phrase.
 
-vc(np/np, Spec, Comp, DP, P@IO) -->
+vc(np/pp, V, Spec, Comp, VC) -->
+  dp(_, Spec, DP), pp(Comp, PP),
+  { vclf(V, DP, PP, VC) }.
+vc(np/P, V, Spec, Comp, VC) -->
+  dp(_, Spec, DP), pp(P, Comp, PP),
+  { vclf(V, DP, PP, VC) }.
+vc(np/np, V, Spec, Comp, VC) -->
+  dp(_, Spec, IO), dp(_, Comp, DP),
   { p(to, _, P, _, _) },
-  dp(_, Spec, IO), dp(_, Comp, DP).
-vc(np/pp, Spec, Comp, DP, PP) -->
-  dp(_, Spec, DP), pp(Comp, PP).
-vc(np/P, Spec, Comp, DP, PP) -->
-  dp(_, Spec, DP), pp(P, Comp, PP).
+  { vclf(V, DP, P@IO, VC) }.
+
+% Relative clause with complement gap.
+vc(np/np, V, Spec, dp(t/N), (P@IO)@VPi) -->
+  dp(_, Spec, IO),
+  cstack_pop(rel, NPi, N, _),
+  { p(to, _, P, _, _) },
+  { and(V, NPi, VPi) }.
+
+% Logical form for verb complements.
+vclf(V, DP, PP, x^PP@(V@DP@x)).
 
 
 %% vv(+V_t, +V_i, -T, -I)
