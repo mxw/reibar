@@ -635,6 +635,27 @@ case_role(obl, obj).
 case_role(gpn, _).
 
 
+% pn(?Agr, ?Case, ?P)
+%
+% Personal pronouns.
+
+pn(Agr, nom,  P) --> [P], {pro(Agr, P, _, _, _, _)}.
+pn(Agr, obl,  P) --> [P], {pro(Agr, _, P, _, _, _)}.
+pn(Agr, pos,  P) --> [P], {pro(Agr, _, _, P, _, _)}.
+pn(Agr, gpn,  P) --> [P], {pro(Agr, _, _, _, P, _)}.
+pn(Agr, refl, P) --> [P], {pro(Agr, _, _, _, _, P)}.
+
+  pro(sg/1, i,    me,   my,     mine,   myself).
+  pro(sg/2, you,  you,  your,   yours,  yourself).
+  pro(sg/3, he,   him,  his,    his,    himself).
+  pro(sg/3, she,  her,  her,    hers,   herself).
+  pro(sg/3, it,   it,   its,    [],     itself).
+
+  pro(pl/1, we,   us,   our,    ours,   ourselves).
+  pro(pl/2, you,  you,  your,   yours,  yourselves).
+  pro(pl/3, they, them, their,  theirs, themselves).
+
+
 % whpro(?Wh, ?Case, ?Hum ?Rel)
 %
 % Wh- pronouns.  Features include case, relativizer function (bound/free), and
