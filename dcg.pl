@@ -110,6 +110,11 @@ s(CPt, CPi) --> {cstack_init}, cp(CPt, CPi), {cstack_empty}.
 
 cp(cp(C_t), C_i) --> c_(C_t, C_i).
 
+cp(cp(dp(d_(np(n_(n(N/W))))), C_t), C_i) -->
+  wp(W, _, WPi),
+  cstack_push(rel, WPi, N, W),
+  c_(C_t, C_i).
+
 c_(c_(IPt), IPi) --> ip(IPt, IPi).
 
 % Auxiliary complementizer.
@@ -139,6 +144,14 @@ rel_(Agr, NPi, c_(c(N/RP), IPt), IPi) -->
   cstack_push(rel, NPi, N, RP),
   ip(Agr, Tns, _, IPt, IPi),
   { finite(Tns) }.
+
+
+%% wp(-W, -T, -I)
+%
+% Wh- phrase.  A determiner phrase using wh- words.
+
+wp(W, _, W) --> wh(W).
+%wp(dp(d_(d(which), NPt))) -->
 
 
 %------------------------------------------------------------------------------
@@ -569,3 +582,14 @@ p(P, p(P), x^y^P@y@x) --> [P1, P2], {prep(P1, P2), atom_concat(P1, P2, P)}.
 rp(RP) --> [RP], {rpron(RP)}.
 
   rpron(that).
+
+% Wh- interrogatives.
+wh(WH) --> [WH], {whword(WH)}.
+
+  whword(who).
+  whword(what).
+  whword(when).
+  whword(where).
+  whword(which).
+  whword(why).
+  whword(how).
