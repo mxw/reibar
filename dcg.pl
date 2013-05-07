@@ -112,11 +112,11 @@ s(CPt, CPi) --> {cstack_init}, cp(CPt, CPi), {cstack_empty}.
 
 cp(cp(C_t), C_i) --> c_(C_t, C_i).
 
-cp(cp(dp(d_(np(n_(n(N/W))))), C_t), C_i) -->
-  wp(W, _, WPi),
-  cstack_push(rel, WPi, N, Depth, W),
-  c_(C_t, C_i),
-  { cstack_depth(Depth) }.
+%cp(cp(dp(d_(np(n_(n(N/W))))), C_t), C_i) -->
+%  wp(W, _, WPi),
+%  cstack_push(rel, WPi, N, Depth, W),
+%  c_(C_t, C_i),
+%  { cstack_depth(Depth) }.
 
 c_(c_(IPt), IPi) --> ip(IPt, IPi).
 
@@ -137,27 +137,64 @@ c_(c_(c(N/V), IPt), IPi) -->
   { cstack_depth(Depth) }.
 
 
-%% relp(+NPi, -T, -I)
+%% rp(+Agr, +Hum, -T, -I)
 %
-% Relative clause.  Functions syntactically as a complementizer phrase, but we
-% use a separate predicate.
+% Relative clause.  Functions syntactically as a complementizer phrase, but has
+% distinct rules for construction.
 
-relp(Agr, NPi, C_t, C_i) --> rel_(Agr, NPi, C_t, C_i).
-
-rel_(Agr, NPi, cp(N/'?', c_(c(RP), IPt)), IPi) -->
-  rp(RP),
-  cstack_push(rel, NPi, N, Depth, RP),
+rp(Agr, Hum, cp(Wh, c_(C, IPt)), IPi) -->
+  rrel(Hum, Depth, Wh, C, _),
   ip(Agr, Tns, _, IPt, IPi),
   { finite(Tns) },
   { cstack_depth(Depth) }.
 
 
-%% wp(-W, -T, -I)
+%% rel(+Hum, -Depth, -Wt, -C, -I)
 %
-% Wh- phrase.  A determiner phrase using wh- words.
+% Relativizer.  Hum is the antecedent's humanity---personal or impersonal, and
+% in the latter case, also location, time, etc.
 
-wp(W, _, W) --> wh(W).
-%wp(dp(d_(d(which), NPt))) -->
+% Subject.
+rel(Hum, Depth, dp(N/Wh), c([]), lf) -->
+  whpro(Wh, nom, Hum, bound),
+  cstack_push(nom, lf, N, Depth, _).
+
+% Object of verb or stranded preposition (detached).
+rel(Hum, Depth, dp(N/Wh), c([]), lf) -->
+  whpro(Wh, obl, Hum, bound),
+  cstack_push(obl, lf, N, Depth, _).
+
+% Object of fronted preposition (attached).
+rel(Hum, Depth, pp(Pt, N/Wh), c([]), lf) -->
+  p(Prep, Pt, _),
+  whpro(Wh, obl, Hum, bound),
+  cstack_push(pp, lf, N, Depth, Prep).
+
+% Possessive.
+%rel(Hum, Depth, Wh, c([]), lf) -->
+  % whose DP
+  %cstack_push(gpn, lf, N, Depth, Wh).
+
+
+%% rrel(+Hum, -Depth, -Wt, -C, -I)
+%
+% Restrictive relativizer.  Additionally includes `that' and null relativizers.
+
+rrel(Hum, Depth, Wh, C, lf) --> rel(Hum, Depth, Wh, C, _).
+
+rrel(_, Depth, dp(N/wh), c(that), lf) --> [that],
+  cstack_push(nom, lf, N, Depth, _).
+rrel(_, Depth, dp(N/wh), c(that), lf) --> [that],
+  cstack_push(obl, lf, N, Depth, _).
+rrel(_, Depth, dp(N/wh), c([]), lf) -->
+  cstack_push(obl, lf, N, Depth, _).
+
+
+%% nrel(+Hum, -Depth, -Wt, -C, -I)
+%
+% Non-restrictive relativizer.  Additionally includes "D NP of which/whom".
+
+nrel(Hum, Depth, Wh, C, lf) --> rel(Hum, Depth, Wh, C, _).
 
 
 %------------------------------------------------------------------------------
@@ -182,7 +219,8 @@ ip(Agr, Tns, Gov, ip(DPt, I_t), I_i@DPi) -->
 
 % Relative clause with subject gap.
 ip(Agr, Tns, _, ip(dp(t/N), I_t), IPi) -->
-  cstack_pop(rel, NPi, N, _),
+  cstack_pop(Case, NPi, N, _),
+  { case_role(Case, sbj) },
   i_(Agr, Tns, _, I_t, I_i),
   { and(NPi, I_i, IPi) }.
 
@@ -309,7 +347,8 @@ v_(Agr, Tns, V_t, V_i) -->
 % Relative clause with complement gap.
 v_(Agr, Tns, VVt, VVi) -->
   v(Agr, Tns, np, Vt, Vi),
-  cstack_pop(rel, NPi, N, _),
+  cstack_pop(Case, NPi, N, _),
+  { case_role(Case, obj) },
   { and(NPi, Vi, V_i) },
   vv(v_(Vt, dp(t/N)), V_i, VVt, VVi).
 
@@ -334,7 +373,8 @@ vc(np/np, V, Spec, Comp, VC) -->
 % Relative clause with complement gap.
 vc(np/np, V, Spec, dp(t/N), (P@IO)@VPi) -->
   dp(_, Spec, IO),
-  cstack_pop(rel, NPi, N, _),
+  cstack_pop(Case, NPi, N, _),
+  { case_role(Case, obj) },
   { p(to, _, P, _, _) },
   { and(V, NPi, VPi) }.
 
@@ -401,7 +441,7 @@ nn(_, N_t, N_i, NNt, NNi) -->
   pp(PPt, PPi),
   { and(N_i, PPi, And) },
   nn(_, n_(N_t, PPt), And, NNt, NNi).
-nn(Agr, N_t, N_i, n_(N_t, CPt), CPi) --> relp(Agr, N_i, CPt, CPi).
+nn(Agr, N_t, N_i, n_(N_t, CPt), CPi) --> rp(Agr, _, CPt, CPi).
 
 
 %------------------------------------------------------------------------------
@@ -586,18 +626,55 @@ p(P, p(P), x^y^P@y@x) --> [P1, P2], {prep(P1, P2), atom_concat(P1, P2, P)}.
 %  Pro-forms lexicon.
 %
 
-% Relative pronouns.
-rp(RP) --> [RP], {rpron(RP)}.
+%% case_role(?Case, ?Role)
+%
+% A noun inflected as Case can fill Role.
 
-  rpron(that).
+case_role(nom, sbj).
+case_role(obl, obj).
+case_role(gpn, _).
 
-% Wh- interrogatives.
-wh(WH) --> [WH], {whword(WH)}.
 
-  whword(who).
-  whword(what).
-  whword(when).
-  whword(where).
-  whword(which).
-  whword(why).
-  whword(how).
+% whpro(?Wh, ?Case, ?Hum ?Rel)
+%
+% Wh- pronouns.  Features include case, relativizer function (bound/free), and
+% humanity (personal/impersonal).
+%
+% Technically, relativizer function depends on case; for instance, we can't use
+% the genitive pronoun form in bound clauses:
+%
+%     *The man whose they found.
+%
+% but this is dependent on the case/context pairing, not on the word itself;
+% hence, we make this distinction in the rules and not in the lexical entry.
+
+whpro(Wh, nom, Hum, Rel) --> [Wh], {whpro(Wh, _, _, Hum, Rs), member(Rel, Rs)}.
+whpro(Wh, obl, Hum, Rel) --> [Wh], {whpro(_, Wh, _, Hum, Rs), member(Rel, Rs)}.
+whpro(Wh, pos, Hum, Rel) --> [Wh], {whpro(_, _, Wh, Hum, Rs), member(Rel, Rs)}.
+whpro(Wh, gpn, Hum, Rel) --> [Wh], {whpro(_, _, Wh, Hum, Rs), member(Rel, Rs)}.
+
+  whpro(who,    whom,   whose,  pers,   [bound, free]).
+  whpro(which,  which,  whose,  imprs,  [bound, free]).
+  whpro(what,   what,   [],     imprs,  [free]).
+
+% whdet(?Wh)
+%
+% Wh- determiners.  No features; all are humanity-blind and used in free
+% contexts only.
+
+whdet(Wh) --> [Wh], {whdet(Wh)}.
+
+  whdet(what).
+  whdet(which).
+
+% whadv(?Wh, ?Fn, ?Rel)
+%
+% Wh- adverbs.  Features include function (time, location, etc.) and
+% relativizer function (bound/free).
+
+whadv(Wh, Fn, Rel) --> [Wh], {whadv(Wh, Fn, Rs), member(Rel, Rs)}.
+
+  whadv(when,   time,   [bound, free]).
+  whadv(where,  loc,    [bound, free]).
+  whadv(why,    reas,   [bound, free]).
+  whadv(how,    manner, [free]).
