@@ -70,12 +70,14 @@ cstack_depth(N) :-
   b_getval(cstack, CStack),
   length(CStack, N).
 
-%% cstack_push(+CType, +LF, -N, +Gov)
+%% cstack_push(+CType, +LF, -N, -Depth, +Gov)
 %
-% Push a complementizer onto the stack.
+% Push a complementizer onto the stack, outputting its index and the stack
+% depth before pushing.
 
-cstack_push(CType, LF, N, Data) --> [],
+cstack_push(CType, LF, N, Depth, Data) --> [],
   { c_incr(N),
+    cstack_depth(Depth),
     b_getval(cstack, CStack),
     b_setval(cstack, [c(CType, LF, N, Data) | CStack])
   }.
@@ -112,8 +114,9 @@ cp(cp(C_t), C_i) --> c_(C_t, C_i).
 
 cp(cp(dp(d_(np(n_(n(N/W))))), C_t), C_i) -->
   wp(W, _, WPi),
-  cstack_push(rel, WPi, N, W),
-  c_(C_t, C_i).
+  cstack_push(rel, WPi, N, Depth, W),
+  c_(C_t, C_i),
+  { cstack_depth(Depth) }.
 
 c_(c_(IPt), IPi) --> ip(IPt, IPi).
 
@@ -121,15 +124,17 @@ c_(c_(IPt), IPi) --> ip(IPt, IPi).
 c_(c_(c(N/Aux), IPt), IPi) -->
   aux(Agr, Tns, Gov, Aux, LF),
   { finite(Tns) },
-  cstack_push(aux, LF, N, Tns/Gov),
-  ip(Agr, _, Gov, IPt, IPi).
+  cstack_push(aux, LF, N, Depth, Tns/Gov),
+  ip(Agr, _, Gov, IPt, IPi),
+  { cstack_depth(Depth) }.
 
 % Main verb complementizer (be/have).
 c_(c_(c(N/V), IPt), IPi) -->
   v(Agr, Tns, Gov, Sub, v(V), LF),
   { finite(Tns), aspect(Gov) },
-  cstack_push(verb, LF, N, Tns/Sub),
-  ip(Agr, _, simp, IPt, IPi).
+  cstack_push(verb, LF, N, Depth, Tns/Sub),
+  ip(Agr, _, simp, IPt, IPi),
+  { cstack_depth(Depth) }.
 
 
 %% relp(+NPi, -T, -I)
@@ -137,13 +142,14 @@ c_(c_(c(N/V), IPt), IPi) -->
 % Relative clause.  Functions syntactically as a complementizer phrase, but we
 % use a separate predicate.
 
-relp(Agr, NPi, cp(C_t), C_i) --> rel_(Agr, NPi, C_t, C_i).
+relp(Agr, NPi, C_t, C_i) --> rel_(Agr, NPi, C_t, C_i).
 
-rel_(Agr, NPi, c_(c(N/RP), IPt), IPi) -->
+rel_(Agr, NPi, cp(N/'?', c_(c(RP), IPt)), IPi) -->
   rp(RP),
-  cstack_push(rel, NPi, N, RP),
+  cstack_push(rel, NPi, N, Depth, RP),
   ip(Agr, Tns, _, IPt, IPi),
-  { finite(Tns) }.
+  { finite(Tns) },
+  { cstack_depth(Depth) }.
 
 
 %% wp(-W, -T, -I)
