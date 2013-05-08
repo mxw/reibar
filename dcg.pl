@@ -70,7 +70,7 @@ cstack_depth(N) :-
   b_getval(cstack, CStack),
   length(CStack, N).
 
-%% cstack_push(+CType, +LF, -N, -Depth, +Gov)
+%% cstack_push(+CType, +LF, -N, -Depth, +Data)
 %
 % Push a complementizer onto the stack, outputting its index and the stack
 % depth before pushing.
@@ -82,7 +82,7 @@ cstack_push(CType, LF, N, Depth, Data) --> [],
     b_setval(cstack, [c(CType, LF, N, Data) | CStack])
   }.
 
-%% cstack_pop(-CType, -LF, -N, -Gov)
+%% cstack_pop(-CType, -LF, -N, -Data)
 %
 % Pop a complementizer off the stack.
 
@@ -344,7 +344,7 @@ v_(Agr, Tns, V_t, V_i) -->
   ap(APt, APi),
   vv(v_(Vt, APt), Vi@APi, V_t, V_i).
 
-% Relative clause with complement gap.
+% Relative clause with object gap.
 v_(Agr, Tns, VVt, VVi) -->
   v(Agr, Tns, np, Vt, Vi),
   cstack_pop(Case, NPi, N, _),
