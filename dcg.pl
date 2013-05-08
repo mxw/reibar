@@ -21,6 +21,16 @@ sentence(String, Tree, Interp) :-
   s(Tree, Interp_, String, []),
   bnf(Interp_, Interp).
 
+
+%% incr(+Counter, -N)
+%
+% Increment Counter with result N.
+
+incr(Counter, N_) :-
+  b_getval(Counter, N),
+  N_ is N + 1,
+  b_setval(Counter, N_).
+
 %% and(+LF1, +LF2, -AndLF)
 %
 % Encoding of logical `and'.
@@ -45,10 +55,7 @@ c_reset :- b_setval(counter, 0).
 %
 % Increment counter with result N.
 
-c_incr(N_) :-
-  b_getval(counter, N),
-  N_ is N + 1,
-  b_setval(counter, N_).
+c_incr(N) :- incr(counter, N).
 
 %% cstack_init
 %
