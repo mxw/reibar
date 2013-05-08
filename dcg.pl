@@ -710,7 +710,7 @@ whdet(Wh) --> [Wh], {whdet(Wh)}.
 
 % whadv(?Wh, ?Fn, ?Rel)
 %
-% Wh- adverbs.  Features include function (time, location, etc.) and
+% Wh- adverbs.  Features include wh function (time, location, etc.) and
 % relativizer function (bound/free).
 
 whadv(Wh, Fn, Rel) --> [Wh], {whadv(Wh, Fn, Rs), member(Rel, Rs)}.
