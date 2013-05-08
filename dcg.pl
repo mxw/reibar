@@ -270,12 +270,12 @@ ii(Agr, Tns, simp, Vld, VP, LF) --> vp(Agr, Tns, Vld, VP, LF).
 % mp(+Agr, -Tns, -T, -LF)   Modal phrase.
 % mc(-T, -LF)               Modal complement.
 
-mp(Agr, Tns, Vld, mp(m(Aux), MC), E:[Pred@E@E_ | LF]) --> event(E),
-  aux(Agr, Tns, mod, Aux, Pred),
+mp(Agr, Tns, Vld, mp(m(Aux), MC), E:[Lbd@E@E_ | LF]) --> event(E),
+  aux(Agr, Tns, mod, Aux, Lbd),
   mc(Vld, MC, E_:LF).
 
-mp(_, Tns, Vld, mp(m(t/N), MC), E:[Pred@E@E_ | LF]) --> event(E),
-  cstack_pop(aux, Pred, N, Tns/mod),
+mp(_, Tns, Vld, mp(m(t/N), MC), E:[Lbd@E@E_ | LF]) --> event(E),
+  cstack_pop(aux, Lbd, N, Tns/mod),
   mc(Vld, MC, E_:LF).
 
 mc(Vld, PerfP, LF) --> perfp(_, infin, Vld, PerfP, LF).
@@ -288,12 +288,12 @@ mc(Vld, VP, LF) --> vp(_, infin, Vld, VP, LF).
 % perfp(+Agr, -Tns, -T, -LF)  Perfective phrase.
 % perfc(-T, -LF)              Perfective complement.
 
-perfp(Agr, Tns, Vld, perfp(perf(Aux), PerfC), E:[Pred@E@E_ | LF]) --> event(E),
-  aux(Agr, Tns, perf, Aux, Pred),
+perfp(Agr, Tns, Vld, perfp(perf(Aux), PerfC), E:[Lbd@E@E_ | LF]) --> event(E),
+  aux(Agr, Tns, perf, Aux, Lbd),
   perfc(Vld, PerfC, E_:LF).
 
-perfp(_, Tns, Vld, perfp(perf(t/N), PerfC), E:[Pred@E@E_ | LF]) --> event(E),
-  cstack_pop(aux, Pred, N, Tns/perf),
+perfp(_, Tns, Vld, perfp(perf(t/N), PerfC), E:[Lbd@E@E_ | LF]) --> event(E),
+  cstack_pop(aux, Lbd, N, Tns/perf),
   perfc(Vld, PerfC, E_:LF).
 
 perfc(Vld, ProgP, LF) --> progp(_, pastp, Vld, ProgP, LF).
@@ -304,12 +304,12 @@ perfc(Vld, VP, LF) --> vp(_, pastp, Vld, VP, LF).
 %
 % progp(+Agr, -Tns, -T, -LF)  Progressive phrase.
 
-progp(Agr, Tns, Vld, progp(prog(Aux), VP), E:[Pred@E@E_ | LF]) --> event(E),
-  aux(Agr, Tns, prog, Aux, Pred),
+progp(Agr, Tns, Vld, progp(prog(Aux), VP), E:[Lbd@E@E_ | LF]) --> event(E),
+  aux(Agr, Tns, prog, Aux, Lbd),
   vp(_, presp, Vld, VP, E_:LF).
 
-progp(_, Tns, Vld, progp(prog(t/N), VP), E:[Pred@E@E_ | LF]) --> event(E),
-  cstack_pop(aux, Pred, N, Tns/prog),
+progp(_, Tns, Vld, progp(prog(t/N), VP), E:[Lbd@E@E_ | LF]) --> event(E),
+  cstack_pop(aux, Lbd, N, Tns/prog),
   vp(_, presp, Vld, VP, E_:LF).
 
 
@@ -344,7 +344,7 @@ vopt(_, Tns, Sub, v(t/N), LF) --> cstack_pop(verb, LF, N, Tns/Sub).
 % Verb phrases.  We delegate verb subcategories with one or two theta roles to
 % v_/4 and those with three theta roles to vc/5.
 
-vp(Agr, Tns, Pred, vp(V_), LF) --> v_(Agr, Tns, Pred, V_, LF).
+vp(Agr, Tns, Lbd, vp(V_), LF) --> v_(Agr, Tns, Lbd, V_, LF).
 
 vp(Agr, Tns, vp(v_(v(N/v), vp(Spec, V_))), V_i) -->
   v(Agr, Tns, Sub, v(V), Vi),
@@ -357,17 +357,17 @@ vp(Agr, Tns, vp(v_(v(N/v), vp(Spec, V_))), V_i) -->
 %
 % Verb bars for the subcategories `nil', `np', and `a'.
 
-v_(Agr, Tns, Pred@E, V_, E:LF) --> event(E),
-  vopt(Agr, Tns, nil, V, Pred),
+v_(Agr, Tns, Lbd@E, V_, E:LF) --> event(E),
+  vopt(Agr, Tns, nil, V, Lbd),
   vv(v_(V), E, V_, LF).
 
-v_(Agr, Tns, Pred@E@X, V_, E:[LF1 | LF2]) --> event(E),
-  vopt(Agr, Tns, np, V, Pred),
+v_(Agr, Tns, Lbd@E@X, V_, E:[LF1 | LF2]) --> event(E),
+  vopt(Agr, Tns, np, V, Lbd),
   dp(_, DP, X:LF1),
   vv(v_(V, DP), E, V_, LF2).
 
 %v_(Agr, Tns, V_, V_i) --> event(E),
-%  vopt(Agr, Tns, a, V, Pred),
+%  vopt(Agr, Tns, a, V, Lbd),
 %  ap(AP, APi),
 %  vv(v_(V, AP), Vi@APi, V_, V_i).
 
@@ -450,8 +450,8 @@ np(Agr, np(N_), LF) --> n_(Agr, N_, LF).
 %
 % Noun bars.
 
-n_(Agr, N_, X:[Pred@X | LF]) --> entity(X),
-  n(Agr, N, Pred),
+n_(Agr, N_, X:[Lbd@X | LF]) --> entity(X),
+  n(Agr, N, Lbd),
   nn(Agr, n_(N), X, N_, LF).
 
 %n_(Agr, N_, N_i) -->
