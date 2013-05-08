@@ -97,59 +97,59 @@ cstack_pop(CType, LF, N, Data) --> [],
 %  Complementizer grammar.
 %
 
-%% s(-T, -I)
+%% s(-T, -LF)
 %
 % Sentence.  Initialize the system and parse a CP.
 
-s(CPt, CPi) --> {cstack_init}, cp(CPt, CPi), {cstack_empty}.
+s(CP, CPi) --> {cstack_init}, cp(CP, CPi), {cstack_empty}.
 
 
-%% cp(-T, -I)
+%% cp(-T, -LF)
 %
 % Complementizer phrase.  We push specifiers and heads of CP's onto a
 % sentence-local complementizer stack---this is used to pass them to their
 % usual position in the sentence.
 
-cp(cp(C_t), C_i) --> c_(C_t, C_i).
+cp(cp(C_), C_i) --> c_(C_, C_i).
 
-%cp(cp(dp(d_(np(n_(n(N/W))))), C_t), C_i) -->
+%cp(cp(dp(d_(np(n_(n(N/W))))), C_), C_i) -->
 %  wp(W, _, WPi),
 %  cstack_push(rel, WPi, N, Depth, W),
-%  c_(C_t, C_i),
+%  c_(C_, C_i),
 %  { cstack_depth(Depth) }.
 
-c_(c_(IPt), IPi) --> ip(IPt, IPi).
+c_(c_(IP), IPi) --> ip(IP, IPi).
 
 % Auxiliary complementizer.
-c_(c_(c(N/Aux), IPt), IPi) -->
+c_(c_(c(N/Aux), IP), IPi) -->
   aux(Agr, Tns, Gov, Aux, LF),
   { finite(Tns) },
   cstack_push(aux, LF, N, Depth, Tns/Gov),
-  ip(Agr, _, Gov, IPt, IPi),
+  ip(Agr, _, Gov, IP, IPi),
   { cstack_depth(Depth) }.
 
 % Main verb complementizer (be/have).
-c_(c_(c(N/V), IPt), IPi) -->
+c_(c_(c(N/V), IP), IPi) -->
   v(Agr, Tns, Gov, Sub, v(V), LF),
   { finite(Tns), aspect(Gov) },
   cstack_push(verb, LF, N, Depth, Tns/Sub),
-  ip(Agr, _, simp, IPt, IPi),
+  ip(Agr, _, simp, IP, IPi),
   { cstack_depth(Depth) }.
 
 
-%% rp(+Agr, +Hum, -T, -I)
+%% rp(+Agr, +Hum, -T, -LF)
 %
 % Relative clause.  Functions syntactically as a complementizer phrase, but has
 % distinct rules for construction.
 
-rp(Agr, Hum, cp(Wh, c_(C, IPt)), IPi) -->
+rp(Agr, Hum, cp(Wh, c_(C, IP)), IPi) -->
   rrel(Hum, Depth, Wh, C, _),
-  ip(Agr, Tns, _, IPt, IPi),
+  ip(Agr, Tns, _, IP, IPi),
   { finite(Tns) },
   { cstack_depth(Depth) }.
 
 
-%% rel(+Hum, -Depth, -Wt, -C, -I)
+%% rel(+Hum, -Depth, -Wt, -C, -LF)
 %
 % Relativizer.  Hum is the antecedent's humanity---personal or impersonal, and
 % in the latter case, also location, time, etc.
@@ -165,8 +165,8 @@ rel(Hum, Depth, dp(N/Wh), c([]), lf) -->
   cstack_push(obl, lf, N, Depth, _).
 
 % Object of fronted preposition (attached).
-rel(Hum, Depth, pp(Pt, N/Wh), c([]), lf) -->
-  p(Prep, Pt, _),
+rel(Hum, Depth, pp(P, N/Wh), c([]), lf) -->
+  p(Prep, P, _),
   whpro(Wh, obl, Hum, bound),
   cstack_push(pp, lf, N, Depth, Prep).
 
@@ -176,7 +176,7 @@ rel(Hum, Depth, pp(Pt, N/Wh), c([]), lf) -->
   %cstack_push(gpn, lf, N, Depth, Wh).
 
 
-%% rrel(+Hum, -Depth, -Wt, -C, -I)
+%% rrel(+Hum, -Depth, -Wt, -C, -LF)
 %
 % Restrictive relativizer.  Additionally includes `that' and null relativizers.
 
@@ -190,7 +190,7 @@ rrel(_, Depth, dp(N/wh), c([]), lf) -->
   cstack_push(obl, lf, N, Depth, _).
 
 
-%% nrel(+Hum, -Depth, -Wt, -C, -I)
+%% nrel(+Hum, -Depth, -Wt, -C, -LF)
 %
 % Non-restrictive relativizer.  Additionally includes "D NP of which/whom".
 
@@ -204,98 +204,98 @@ nrel(Hum, Depth, Wh, C, lf) --> rel(Hum, Depth, Wh, C, _).
 
 %% Inflectional phrases.
 %
-% ip(-T, -I)      Binds a DP to an I_ by number and person and forces the I_
+% ip(-T, -LF)     Binds a DP to an I_ by number and person and forces the I_
 %                 to be tense-finite.
-% ip(+Agr, +Gov, -T, -I)    Enforces agreement Agr on DP without restricting I_.
+% ip(+Agr, +Gov, -T, -LF)   Enforces agreement Agr on DP without restricting I_.
 
-ip(ip(DPt, I_t), I_i@DPi) -->
-  dp(Agr, DPt, DPi),
-  i_(Agr, Tns, _, I_t, I_i),
+ip(ip(DP, I_), I_i@DPi) -->
+  dp(Agr, DP, DPi),
+  i_(Agr, Tns, _, I_, I_i),
   { finite(Tns) }.
 
-ip(Agr, Tns, Gov, ip(DPt, I_t), I_i@DPi) -->
-  dp(Agr, DPt, DPi),
-  i_(_, Tns, Gov, I_t, I_i).
+ip(Agr, Tns, Gov, ip(DP, I_), I_i@DPi) -->
+  dp(Agr, DP, DPi),
+  i_(_, Tns, Gov, I_, I_i).
 
 % Relative clause with subject gap.
-ip(Agr, Tns, _, ip(dp(t/N), I_t), IPi) -->
+ip(Agr, Tns, _, ip(dp(t/N), I_), IPi) -->
   cstack_pop(Case, NPi, N, _),
   { case_role(Case, sbj) },
-  i_(Agr, Tns, _, I_t, I_i),
+  i_(Agr, Tns, _, I_, I_i),
   { and(NPi, I_i, IPi) }.
 
-i_(Agr, Tns, Gov, i_(i(Tns), IIt), IIi) --> ii(Agr, Tns, Gov, IIt, IIi).
+i_(Agr, Tns, Gov, i_(i(Tns), II), IIi) --> ii(Agr, Tns, Gov, II, IIi).
 
-ii(Agr, Tns, mod,  VPt, VPi) --> mp(Agr, Tns, VPt, VPi).
-ii(Agr, Tns, perf, VPt, VPi) --> perfp(Agr, Tns, VPt, VPi).
-ii(Agr, Tns, prog, VPt, VPi) --> progp(Agr, Tns, VPt, VPi).
-ii(Agr, Tns, dsup, VPt, VPi) --> dsup(Agr, Tns, VPt, VPi).
-ii(Agr, Tns, simp, VPt, VPi) --> vp(Agr, Tns, VPt, VPi).
+ii(Agr, Tns, mod,  VP, VPi) --> mp(Agr, Tns, VP, VPi).
+ii(Agr, Tns, perf, VP, VPi) --> perfp(Agr, Tns, VP, VPi).
+ii(Agr, Tns, prog, VP, VPi) --> progp(Agr, Tns, VP, VPi).
+ii(Agr, Tns, dsup, VP, VPi) --> dsup(Agr, Tns, VP, VPi).
+ii(Agr, Tns, simp, VP, VPi) --> vp(Agr, Tns, VP, VPi).
 
 
 %% Modality.
 %
-% mp(+Agr, -Tns, -T, -I)    Modal phrase.
-% mc(-T, -I)                Modal complement.
+% mp(+Agr, -Tns, -T, -LF)   Modal phrase.
+% mc(-T, -LF)               Modal complement.
 
-mp(Agr, Tns, mp(m(Aux), MCt), MCi) -->
+mp(Agr, Tns, mp(m(Aux), MC), MCi) -->
   aux(Agr, Tns, mod, Aux, _),
   \+ cstack_pop(aux, _, _, _/mod),
-  mc(MCt, MCi).
+  mc(MC, MCi).
 
-mp(_, Tns, mp(m(t/N), MCt), MCi) -->
+mp(_, Tns, mp(m(t/N), MC), MCi) -->
   cstack_pop(aux, _, N, Tns/mod),
-  mc(MCt, MCi).
+  mc(MC, MCi).
 
-mc(PerfPt, PerfPi) --> perfp(_, infin, PerfPt, PerfPi).
-mc(ProgPt, ProgPi) --> progp(_, infin, ProgPt, ProgPi).
-mc(VPt, VPi) --> vp(_, infin, VPt, VPi).
+mc(PerfP, PerfPi) --> perfp(_, infin, PerfP, PerfPi).
+mc(ProgP, ProgPi) --> progp(_, infin, ProgP, ProgPi).
+mc(VP, VPi) --> vp(_, infin, VP, VPi).
 
 
 %% Perfective aspect.
 %
-% perfp(+Agr, -Tns, -T, -I)   Perfective phrase.
-% perfc(-T, -I)               Perfective complement.
+% perfp(+Agr, -Tns, -T, -LF)  Perfective phrase.
+% perfc(-T, -LF)              Perfective complement.
 
-perfp(Agr, Tns, perfp(perf(Aux), PerfCt), PerfCi) -->
+perfp(Agr, Tns, perfp(perf(Aux), PerfC), PerfCi) -->
   aux(Agr, Tns, perf, Aux, _),
   \+ cstack_pop(aux, _, _, _/perf),
-  perfc(PerfCt, PerfCi).
+  perfc(PerfC, PerfCi).
 
-perfp(_, Tns, perfp(perf(t/N), PerfCt), PerfCi) -->
+perfp(_, Tns, perfp(perf(t/N), PerfC), PerfCi) -->
   cstack_pop(aux, _, N, Tns/perf),
-  perfc(PerfCt, PerfCi).
+  perfc(PerfC, PerfCi).
 
-perfc(ProgPt, ProgPi) --> progp(_, pastp, ProgPt, ProgPi).
-perfc(VPt, VPi) --> vp(_, pastp, VPt, VPi).
+perfc(ProgP, ProgPi) --> progp(_, pastp, ProgP, ProgPi).
+perfc(VP, VPi) --> vp(_, pastp, VP, VPi).
 
 
 %% Progressive aspect.
 %
-% progp(+Agr, -Tns, -T, -I)   Progressive phrase.
+% progp(+Agr, -Tns, -T, -LF)  Progressive phrase.
 
-progp(Agr, Tns, progp(prog(Aux), VPt), VPi) -->
+progp(Agr, Tns, progp(prog(Aux), VP), VPi) -->
   aux(Agr, Tns, prog, Aux, _),
   \+ cstack_pop(aux, _, _, _/prog),
-  vp(_, presp, VPt, VPi).
+  vp(_, presp, VP, VPi).
 
-progp(_, Tns, progp(prog(t/N), VPt), VPi) -->
+progp(_, Tns, progp(prog(t/N), VP), VPi) -->
   cstack_pop(aux, _, N, Tns/prog),
-  vp(_, presp, VPt, VPi).
+  vp(_, presp, VP, VPi).
 
 
 %% Do-support.
 %
-% dsup(+Agr, -Tns, -T, -I)    Fill `do' into Tns.
+% dsup(+Agr, -Tns, -T, -LF)   Fill `do' into Tns.
 
-dsup(Agr, Do, VPt, VPi) -->
+dsup(Agr, Do, VP, VPi) -->
   aux(Agr, _, dsup, Do, _),
   \+ cstack_pop(aux, _, _, _/dsup),
-  vp(_, infin, VPt, VPi).
+  vp(_, infin, VP, VPi).
 
-dsup(_, t/N, VPt, VPi) -->
+dsup(_, t/N, VP, VPi) -->
   cstack_pop(aux, _, N, _/dsup),
-  vp(_, infin, VPt, VPi).
+  vp(_, infin, VP, VPi).
 
 
 %------------------------------------------------------------------------------
@@ -307,50 +307,50 @@ dsup(_, t/N, VPt, VPi) -->
 %
 % Parse a verb or pop one off the complementizer stack.
 
-vopt(Agr, Tns, Sub, Vt, Vi) -->
-  v(Agr, Tns, Sub, Vt, Vi),
+vopt(Agr, Tns, Sub, V, Vi) -->
+  v(Agr, Tns, Sub, V, Vi),
   \+ cstack_pop(verb, _, _, _).
 vopt(_, Tns, Sub, v(t/N), Vi) -->
   cstack_pop(verb, Vi, N, Tns/Sub).
 
 
-%% vp(+Agr, -Tns, -T, -I)
+%% vp(+Agr, -Tns, -T, -LF)
 %
 % Verb phrases.  We delegate verb subcategories with one or two theta roles to
 % v_/4 and those with three theta roles to vc/5.
 
-vp(Agr, Tns, vp(V_t), V_i) --> v_(Agr, Tns, V_t, V_i).
+vp(Agr, Tns, vp(V_), V_i) --> v_(Agr, Tns, V_, V_i).
 
-vp(Agr, Tns, vp(v_(v(N/v), vp(Spec, V_t))), V_i) -->
+vp(Agr, Tns, vp(v_(v(N/v), vp(Spec, V_))), V_i) -->
   v(Agr, Tns, Sub, v(V), Vi),
   vc(Sub, Vi, Spec, Comp, VCi),
   { c_incr(N) },
-  vv(v_(v(V/N), Comp), VCi, V_t, V_i).
+  vv(v_(v(V/N), Comp), VCi, V_, V_i).
 
 
-%% v_(+Agr, -Tns, -T, -I)
+%% v_(+Agr, -Tns, -T, -LF)
 %
 % Verb bars for the subcategories `nil', `np', and `a'.
 
-v_(Agr, Tns, V_t, V_i) -->
-  vopt(Agr, Tns, nil, Vt, Vi),
-  vv(v_(Vt), Vi, V_t, V_i).
-v_(Agr, Tns, V_t, V_i) -->
-  vopt(Agr, Tns, np, Vt, Vi),
-  dp(_, DPt, DPi),
-  vv(v_(Vt, DPt), Vi@DPi, V_t, V_i).
-v_(Agr, Tns, V_t, V_i) -->
-  vopt(Agr, Tns, a, Vt, Vi),
-  ap(APt, APi),
-  vv(v_(Vt, APt), Vi@APi, V_t, V_i).
+v_(Agr, Tns, V_, V_i) -->
+  vopt(Agr, Tns, nil, V, Vi),
+  vv(v_(V), Vi, V_, V_i).
+v_(Agr, Tns, V_, V_i) -->
+  vopt(Agr, Tns, np, V, Vi),
+  dp(_, DP, DPi),
+  vv(v_(V, DP), Vi@DPi, V_, V_i).
+v_(Agr, Tns, V_, V_i) -->
+  vopt(Agr, Tns, a, V, Vi),
+  ap(AP, APi),
+  vv(v_(V, AP), Vi@APi, V_, V_i).
 
 % Relative clause with object gap.
-v_(Agr, Tns, VVt, VVi) -->
-  v(Agr, Tns, np, Vt, Vi),
+v_(Agr, Tns, VV, VVi) -->
+  v(Agr, Tns, np, V, Vi),
   cstack_pop(Case, NPi, N, _),
   { case_role(Case, obj) },
   { and(NPi, Vi, V_i) },
-  vv(v_(Vt, dp(t/N)), V_i, VVt, VVi).
+  vv(v_(V, dp(t/N)), V_i, VV, VVi).
 
 
 %% vc(+Sub, -Spec, -Comp, -DP, -PP)
@@ -382,14 +382,14 @@ vc(np/np, V, Spec, dp(t/N), (P@IO)@VPi) -->
 vclf(V, DP, PP, x^PP@(V@DP@x)).
 
 
-%% vv(+V_t, +V_i, -T, -I)
+%% vv(+V_, +V_i, -T, -LF)
 %
 % Verb adjuncts.  Adjoins prepositional phrases to verb bars.
 
-vv(V_t, V_i, V_t, V_i) --> [].
-vv(V_t, V_i, VVt, VVi) -->
-  pp(PPt, PPi),
-  vv(v_(V_t, PPt), x^PPi@(V_i@x), VVt, VVi).
+vv(V_, V_i, V_, V_i) --> [].
+vv(V_, V_i, VV, VVi) -->
+  pp(PP, PPi),
+  vv(v_(V_, PP), x^PPi@(V_i@x), VV, VVi).
 
 
 %------------------------------------------------------------------------------
@@ -397,51 +397,51 @@ vv(V_t, V_i, VVt, VVi) -->
 %  Determiner and noun grammar.
 %
 
-%% dp(+Agr, -T, -I)
+%% dp(+Agr, -T, -LF)
 %
 % Determiner phrases.
 
-dp(Agr, dp(D_t), D_i) --> d_(Agr, D_t, D_i).
+dp(Agr, dp(D_), D_i) --> d_(Agr, D_, D_i).
 
 
-%% d_(+Agr, -T, -I)
+%% d_(+Agr, -T, -LF)
 %
 % Determiner bars.
 
-d_(Agr, d_(np(n_(PRt))), PRi) --> pr(Agr, PRt, PRi).
-d_(Agr, d_(Dt, NPt), Di@NPi) --> d(Agr, Dt, Di), np(Agr, NPt, NPi).
+d_(Agr, d_(np(n_(PR))), PRi) --> pr(Agr, PR, PRi).
+d_(Agr, d_(D, NP), Di@NPi) --> d(Agr, D, Di), np(Agr, NP, NPi).
 
 
-%% np(+Agr, -T, -I)
+%% np(+Agr, -T, -LF)
 %
 % Noun phrases.
 
-np(Agr, np(N_t), N_i) --> n_(Agr, N_t, N_i).
+np(Agr, np(N_), N_i) --> n_(Agr, N_, N_i).
 
 
-%% n_(+Agr, -T, -I)
+%% n_(+Agr, -T, -LF)
 %
 % Noun bars.
 
-n_(Agr, N_t, N_i) --> n(Agr, Nt, Ni), nn(Agr, n_(Nt), Ni, N_t, N_i).
-n_(Agr, N_t, N_i) -->
-  ap(APt, APi),
-  n(Agr, Nt, Ni),
+n_(Agr, N_, N_i) --> n(Agr, N, Ni), nn(Agr, n_(N), Ni, N_, N_i).
+n_(Agr, N_, N_i) -->
+  ap(AP, APi),
+  n(Agr, N, Ni),
   { and(Ni, APi, NA) },
-  nn(Agr, n_(APt, Nt), NA, N_t, N_i).
+  nn(Agr, n_(AP, N), NA, N_, N_i).
 
 
-%% nn(+Agr, +N_t, +N_i, -T, -I)
+%% nn(+Agr, +N_, +N_i, -T, -LF)
 %
 % Noun adjuncts.  Adjoins prepositional phrases and relative clauses to noun
 % bars.
 
-nn(_, N_t, N_i, N_t, N_i) --> [].
-nn(_, N_t, N_i, NNt, NNi) -->
-  pp(PPt, PPi),
+nn(_, N_, N_i, N_, N_i) --> [].
+nn(_, N_, N_i, NN, NNi) -->
+  pp(PP, PPi),
   { and(N_i, PPi, And) },
-  nn(_, n_(N_t, PPt), And, NNt, NNi).
-nn(Agr, N_t, N_i, n_(N_t, CPt), CPi) --> rp(Agr, _, CPt, CPi).
+  nn(_, n_(N_, PP), And, NN, NNi).
+nn(Agr, N_, N_i, n_(N_, CP), CPi) --> rp(Agr, _, CP, CPi).
 
 
 %------------------------------------------------------------------------------
@@ -451,18 +451,18 @@ nn(Agr, N_t, N_i, n_(N_t, CPt), CPi) --> rp(Agr, _, CPt, CPi).
 
 %% Prepositional phrases.
 %
-% pp(-T, -I)          Prepositional phrase.
-% pp(Prep, -T, -I)    PP with pre-bound preposition.
+% pp(-T, -LF)         Prepositional phrase.
+% pp(Prep, -T, -LF)   PP with pre-bound preposition.
 
-pp(PPt, PPi) --> pp(_, PPt, PPi).
-pp(Prep, pp(Pt, DPt), Pi@DPi) --> p(Prep, Pt, Pi), dp(_, DPt, DPi).
+pp(PP, PPi) --> pp(_, PP, PPi).
+pp(Prep, pp(P, DP), Pi@DPi) --> p(Prep, P, Pi), dp(_, DP, DPi).
 
 
-%% ap(-T, -I)
+%% ap(-T, -LF)
 %
 % Adjective phrases.
 
-ap(ap(a_(At)), Ai) --> a(At, Ai).
+ap(ap(a_(A)), Ai) --> a(A, Ai).
 
 
 %------------------------------------------------------------------------------
@@ -520,7 +520,7 @@ v_scf(V, Fs, np/X,  x^y^V@y@x) :- member(np/X, Fs).
 
 %% Auxiliary verbs.
 %
-% aux(?Agr, ?Tns, ?Gov, -T, -I)
+% aux(?Agr, ?Tns, ?Gov, -T, -LF)
 % modal(-Pres, -Pret)
 %
 % We share the paradigm descriptions of `be' and `have' with the verb lexical
@@ -566,7 +566,7 @@ b_scf(_, pp,  x^y^x@y).
 b_scf(V, np,  x^y^V@y@x).
 
 
-%% v(?Agr, ?Tns, ?Gov, ?Sub, -T, -I)
+%% v(?Agr, ?Tns, ?Gov, ?Sub, -T, -LF)
 %
 % Main verbs.  Features include agreement (number and person), tense,
 % governance (modality, aspect, etc.), and subcategorization frame.
