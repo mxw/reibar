@@ -171,64 +171,64 @@ c_(c_(c(N/V), IP), LF) -->
   { cstack_depth(Depth) }.
 
 
-%% rp(+Agr, +Hum, -T, -LF)
+%% rp(+Agr, +Hum, +X, -T, -LF)
 %
 % Relative clause.  Functions syntactically as a complementizer phrase, but has
 % distinct rules for construction.
 
-rp(Agr, Hum, cp(Wh, c_(C, IP)), IPi) -->
-  rrel(Hum, Depth, Wh, C, _),
-  ip(Agr, Tns, _, IP, IPi),
+rp(Agr, Hum, X, cp(Wh, c_(C, IP)), LF) -->
+  rrel(X, Hum, Depth, Wh, C),
+  ip(Agr, Tns, _, IP, LF),
   { finite(Tns) },
   { cstack_depth(Depth) }.
 
 
-%% rel(+Hum, -Depth, -Wt, -C, -LF)
+%% rel(+X, +Hum, -Depth, -Wh, -C)
 %
 % Relativizer.  Hum is the antecedent's humanity---personal or impersonal, and
 % in the latter case, also location, time, etc.
 
 % Subject.
-rel(Hum, Depth, dp(N/Wh), c([]), lf) -->
+rel(X, Hum, Depth, dp(N/Wh), c([])) -->
   whpro(Wh, nom, Hum, bound),
-  cstack_push(nom, lf, N, Depth, _).
+  cstack_push(nom, X, N, Depth, _).
 
 % Object of verb or stranded preposition (detached).
-rel(Hum, Depth, dp(N/Wh), c([]), lf) -->
+rel(X, Hum, Depth, dp(N/Wh), c([])) -->
   whpro(Wh, obl, Hum, bound),
-  cstack_push(obl, lf, N, Depth, _).
+  cstack_push(obl, X, N, Depth, _).
 
 % Object of fronted preposition (attached).
-rel(Hum, Depth, pp(P, N/Wh), c([]), lf) -->
-  p(Prep, P, _),
+rel(X, Hum, Depth, pp(P, N/Wh), c([])) -->
+  p(Prep, abstr, P, Lbd),
   whpro(Wh, obl, Hum, bound),
-  cstack_push(pp, lf, N, Depth, Prep).
+  cstack_push(pp, X:Lbd, N, Depth, Prep).
 
 % Possessive.
-%rel(Hum, Depth, Wh, c([]), lf) -->
+%rel(X, Hum, Depth, Wh, c([])) -->
   % whose DP
-  %cstack_push(gpn, lf, N, Depth, Wh).
+  %cstack_push(gpn, X, N, Depth, Wh).
 
 
-%% rrel(+Hum, -Depth, -Wt, -C, -LF)
+%% rrel(+X, +Hum, -Depth, -Wt, -C)
 %
 % Restrictive relativizer.  Additionally includes `that' and null relativizers.
 
-rrel(Hum, Depth, Wh, C, lf) --> rel(Hum, Depth, Wh, C, _).
+rrel(X, Hum, Depth, Wh, C) --> rel(X, Hum, Depth, Wh, C).
 
-rrel(_, Depth, dp(N/wh), c(that), lf) --> [that],
-  cstack_push(nom, lf, N, Depth, _).
-rrel(_, Depth, dp(N/wh), c(that), lf) --> [that],
-  cstack_push(obl, lf, N, Depth, _).
-rrel(_, Depth, dp(N/wh), c([]), lf) -->
-  cstack_push(obl, lf, N, Depth, _).
+rrel(X, _, Depth, dp(N/wh), c(that)) --> [that],
+  cstack_push(nom, X, N, Depth, _).
+rrel(X, _, Depth, dp(N/wh), c(that)) --> [that],
+  cstack_push(obl, X, N, Depth, _).
+rrel(X, _, Depth, dp(N/wh), c([])) -->
+  cstack_push(obl, X, N, Depth, _).
 
 
-%% nrel(+Hum, -Depth, -Wt, -C, -LF)
+%% nrel(+Hum, -Depth, -Wt, -C)
 %
 % Non-restrictive relativizer.  Additionally includes "D NP of which/whom".
 
-nrel(Hum, Depth, Wh, C, lf) --> rel(Hum, Depth, Wh, C, _).
+nrel(X, Hum, Depth, Wh, C) --> rel(X, Hum, Depth, Wh, C).
 
 
 %------------------------------------------------------------------------------
@@ -251,10 +251,10 @@ ip(Agr, Tns, Gov, ip(DP, I_), [Tns@E, Vld@X, LF2, LF1]) -->
   i_(_, Tns, Gov, Vld, I_, E:LF2).
 
 % Relative clause with subject gap.
-ip(Agr, Tns, _, ip(dp(t/N), I_), [Tns@E, Vld@X, LF2, LF1]) -->
+ip(Agr, Tns, _, ip(dp(t/N), I_), [Tns@E, Vld@X, LF]) -->
   { case_role(Case, sbj) },
-  cstack_pop(Case, X:LF1, N, _),
-  i_(Agr, Tns, _, Vld, I_, E:LF2).
+  cstack_pop(Case, X, N, _),
+  i_(Agr, Tns, _, Vld, I_, E:LF).
 
 i_(Agr, Tns, Gov, Vld, i_(i(Tns), II), LF) --> ii(Agr, Tns, Gov, Vld, II, LF).
 
@@ -372,12 +372,11 @@ v_(Agr, Tns, Lbd@E@X, V_, E:[LF1 | LF2]) --> event(E),
 %  vv(v_(V, AP), Vi@APi, V_, V_i).
 
 % Relative clause with object gap.
-v_(Agr, Tns, VV, VVi) -->
-  v(Agr, Tns, np, V, Vi),
-  cstack_pop(Case, NPi, N, _),
+v_(Agr, Tns, Lbd@E@X, V_, E:LF) --> event(E),
+  v(Agr, Tns, np, V, Lbd),
+  cstack_pop(Case, X, N, _),
   { case_role(Case, obj) },
-  { and(NPi, Vi, V_i) },
-  vv(v_(V, dp(t/N)), V_i, VV, VVi).
+  vv(v_(V, dp(t/N)), E, V_, LF).
 
 
 %% vc(+Sub, +E, -X, -Spec, -Comp, -LF)
@@ -396,15 +395,10 @@ vc(np/np, E, X, Spec, Comp, [Lbd@Y@E, LF1, LF2]) -->
   { p(to, abstr, _, Lbd, _, _) }.
 
 % Relative clause with complement gap.
-vc(np/np, V, Spec, dp(t/N), (P@IO)@VPi) -->
-  dp(_, Spec, IO),
-  cstack_pop(Case, NPi, N, _),
+vc(np/np, E, X, Spec, dp(t/N), [Lbd@Y@E | LF]) -->
   { case_role(Case, obj) },
-  { p(to, _, P, _, _) },
-  { and(V, NPi, VPi) }.
-
-% Logical form for verb complements.
-vclf(V, DP, PP, x^PP@(V@DP@x)).
+  dp(_, Spec, Y:LF), cstack_pop(Case, X, N, _),
+  { p(to, abstr, _, Lbd, _, _) }.
 
 
 %% vv(+V_, +E, -T, -LF)
@@ -468,7 +462,7 @@ nn(_, N_, _, N_, []) --> [].
 nn(_, N_, X, NN, [Lbd@X, LF1, LF2]) -->
   pp(abstr, Lbd, PP, LF1),
   nn(_, n_(N_, PP), X, NN, LF2).
-nn(Agr, N_, N_i, n_(N_, CP), CPi) --> rp(Agr, _, CP, CPi).
+nn(Agr, N_, X, n_(N_, CP), LF) --> rp(Agr, _, X, CP, LF).
 
 
 %------------------------------------------------------------------------------
