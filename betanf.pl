@@ -38,8 +38,9 @@
 %
 %  Holds if Var is a valid variable name, i.e., if it is an atom or atom::N.
 
-is_var(X::_N) :- is_var(X).
 is_var(X) :- atom(X).
+is_var(X/_N) :- is_var(X).
+is_var(X::_N) :- is_var(X).
 
 
 %------------------------------------------------------------------------------
