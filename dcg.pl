@@ -609,11 +609,11 @@ v(Agr, Tns, Sub, Vt, LF) --> v(Agr, Tns, _, Sub, Vt, LF).
 v(_/_,  infin, Gov, Sub, v(V), LF) --> [V], {verb(V,_,_,_,_,Gov,Fs), v_scf(V,Fs,Sub,LF)}.
 v(sg/1, pres,  Gov, Sub, v(V), LF) --> [V], {verb(V,_,_,_,_,Gov,Fs), v_scf(V,Fs,Sub,LF)}.
 v(sg/2, pres,  Gov, Sub, v(V), LF) --> [V], {verb(V,_,_,_,_,Gov,Fs), v_scf(V,Fs,Sub,LF)}.
-v(sg/3, pres,  Gov, Sub, v(V), LF) --> [V], {verb(_,V,_,_,_,Gov,Fs), v_scf(V,Fs,Sub,LF)}.
+v(sg/3, pres,  Gov, Sub, v(V), LF) --> [V], {verb(X,V,_,_,_,Gov,Fs), v_scf(X,Fs,Sub,LF)}.
 v(pl/_, pres,  Gov, Sub, v(V), LF) --> [V], {verb(V,_,_,_,_,Gov,Fs), v_scf(V,Fs,Sub,LF)}.
-v(_/_,  pret,  Gov, Sub, v(V), LF) --> [V], {verb(_,_,V,_,_,Gov,Fs), v_scf(V,Fs,Sub,LF)}.
-v(_/_,  presp, Gov, Sub, v(V), LF) --> [V], {verb(_,_,_,V,_,Gov,Fs), v_scf(V,Fs,Sub,LF)}.
-v(_/_,  pastp, Gov, Sub, v(V), LF) --> [V], {verb(_,_,_,_,V,Gov,Fs), v_scf(V,Fs,Sub,LF)}.
+v(_/_,  pret,  Gov, Sub, v(V), LF) --> [V], {verb(X,_,V,_,_,Gov,Fs), v_scf(X,Fs,Sub,LF)}.
+v(_/_,  presp, Gov, Sub, v(V), LF) --> [V], {verb(X,_,_,V,_,Gov,Fs), v_scf(X,Fs,Sub,LF)}.
+v(_/_,  pastp, Gov, Sub, v(V), LF) --> [V], {verb(X,_,_,_,V,Gov,Fs), v_scf(X,Fs,Sub,LF)}.
 
   verb(do, does, did, doing, done,  dsup, [aux, np]).
   verb(have, has, had, having, had, perf, [aux, np]).
