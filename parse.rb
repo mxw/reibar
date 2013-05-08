@@ -51,6 +51,9 @@ class XBarNode
       @label = label
     end
 
+    # Null heads.
+    tok = '' if tok == '[]'
+
     # Set the final token.
     @token = tok
   end
@@ -96,11 +99,13 @@ class XBarNode
 
     # Stringify leaves.
     if @type == :leaf
-      # Italicize traces, light verbs, and inflectional heads.
+      # Handle traces, light verbs, inflectional heads, and nulls.
       if @token == 'v' or @token == 't'
         s = "$#{s}$"
       elsif @parent.token == 'I'
         s = "[#{s}]"
+      elsif @token == ''
+        s = "$\\varnothing$"
       end
 
       if not @label.nil?
@@ -176,7 +181,7 @@ trees, lfs = IO.popen(swipl, :err => [:child, :out]) do |io|
     s.gsub!(/dp\(d_\(d\(([\w\/. ]+)\),\s*np\(n_\(n\(([\w\/. ]+)\)\)\)\)\)/, '*dp(\1 \2)')
 
     # Regexp for tokenizing the tree.
-    re = /[\w*]+\(|\)|[\w\/. ]+/
+    re = /[\w*]+\(|\)|[\w\/.\[\] ]+/
 
     # X-bar-ificate the tree output.
     s.scan(re).inject(XBarNode.new('')) do |node, token|
@@ -211,6 +216,7 @@ Dir.chdir(OUTDIR)
 # LaTeX header/footer.
 syn_preamble = %w{
   \documentclass[tikz,border=1cm]{standalone}
+  \usepackage{amsmath, amssymb}
   \usepackage[T1]{fontenc}
   \usepackage[english]{babel}
   \usepackage{tikz-qtree}

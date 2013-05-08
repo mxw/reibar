@@ -209,11 +209,11 @@ rel(X, Hum, Depth, pp(P, N/Wh), c([])) -->
 
 rrel(X, Hum, Depth, Wh, C) --> rel(X, Hum, Depth, Wh, C).
 
-rrel(X, _, Depth, dp(N/wh), c(that)) --> [that],
+rrel(X, _, Depth, dp(N/[]), c(that)) --> [that],
   cstack_push(sbj, X, N, Depth, _).
-rrel(X, _, Depth, dp(N/wh), c(that)) --> [that],
+rrel(X, _, Depth, dp(N/[]), c(that)) --> [that],
   cstack_push(obj, X, N, Depth, _).
-rrel(X, _, Depth, dp(N/wh), c([])) -->
+rrel(X, _, Depth, dp(N/[]), c([])) -->
   cstack_push(obj, X, N, Depth, _).
 
 
