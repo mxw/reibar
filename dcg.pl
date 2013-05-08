@@ -204,9 +204,8 @@ nrel(Hum, Depth, Wh, C, lf) --> rel(Hum, Depth, Wh, C, _).
 
 %% Inflectional phrases.
 %
-% ip(-T, -LF)     Binds a DP to an I_ by number and person and forces the I_
-%                 to be tense-finite.
-% ip(+Agr, +Gov, -T, -LF)   Enforces agreement Agr on DP without restricting I_.
+% ip(-T, -LF)                     Null complementizer phrase.
+% ip(+Agr, ?Tns, ?Gov, -T, -LF)   Nonzero complementizer phrase.
 
 ip(ip(DP, I_), I_i@DPi) -->
   dp(Agr, DP, DPi),
@@ -224,13 +223,13 @@ ip(Agr, Tns, _, ip(dp(t/N), I_), IPi) -->
   i_(Agr, Tns, _, I_, I_i),
   { and(NPi, I_i, IPi) }.
 
-i_(Agr, Tns, Gov, i_(i(Tns), II), IIi) --> ii(Agr, Tns, Gov, II, IIi).
+i_(Agr, Tns, Gov, i_(i(Tns), II), LF) --> ii(Agr, Tns, Gov, II, LF).
 
-ii(Agr, Tns, mod,  VP, VPi) --> mp(Agr, Tns, VP, VPi).
-ii(Agr, Tns, perf, VP, VPi) --> perfp(Agr, Tns, VP, VPi).
-ii(Agr, Tns, prog, VP, VPi) --> progp(Agr, Tns, VP, VPi).
-ii(Agr, Tns, dsup, VP, VPi) --> dsup(Agr, Tns, VP, VPi).
-ii(Agr, Tns, simp, VP, VPi) --> vp(Agr, Tns, VP, VPi).
+ii(Agr, Tns, mod,  VP, LF) --> mp(Agr, Tns, VP, LF).
+ii(Agr, Tns, perf, VP, LF) --> perfp(Agr, Tns, VP, LF).
+ii(Agr, Tns, prog, VP, LF) --> progp(Agr, Tns, VP, LF).
+ii(Agr, Tns, dsup, VP, LF) --> dsup(Agr, Tns, VP, LF).
+ii(Agr, Tns, simp, VP, LF) --> vp(Agr, Tns, VP, LF).
 
 
 %% Modality.
@@ -247,9 +246,9 @@ mp(_, Tns, mp(m(t/N), MC), MCi) -->
   cstack_pop(aux, _, N, Tns/mod),
   mc(MC, MCi).
 
-mc(PerfP, PerfPi) --> perfp(_, infin, PerfP, PerfPi).
-mc(ProgP, ProgPi) --> progp(_, infin, ProgP, ProgPi).
-mc(VP, VPi) --> vp(_, infin, VP, VPi).
+mc(PerfP, LF) --> perfp(_, infin, PerfP, LF).
+mc(ProgP, LF) --> progp(_, infin, ProgP, LF).
+mc(VP, LF) --> vp(_, infin, VP, LF).
 
 
 %% Perfective aspect.
@@ -266,8 +265,8 @@ perfp(_, Tns, perfp(perf(t/N), PerfC), PerfCi) -->
   cstack_pop(aux, _, N, Tns/perf),
   perfc(PerfC, PerfCi).
 
-perfc(ProgP, ProgPi) --> progp(_, pastp, ProgP, ProgPi).
-perfc(VP, VPi) --> vp(_, pastp, VP, VPi).
+perfc(ProgP, LF) --> progp(_, pastp, ProgP, LF).
+perfc(VP, LF) --> vp(_, pastp, VP, LF).
 
 
 %% Progressive aspect.
