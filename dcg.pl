@@ -362,9 +362,9 @@ v_(Agr, Tns, Lbd@E@X, V_, E:[LF1 | LF2]) --> event(E),
 % the entity of the object.
 
 vc(np/pp, E, X, Spec, Comp, [Lbd@E, LF1 | LF2]) -->
-  dp(_, obj, Spec, X:LF1), pp(abstr, Lbd, Comp, LF2).
+  dpt(_, obj, Spec, X:LF1), ppt(_, abstr, Lbd, Comp, LF2).
 vc(np/P,  E, X, Spec, Comp, [Lbd@E, LF1 | LF2]) -->
-  dp(_, obj, Spec, X:LF1), pp(P, abstr, Lbd, Comp, LF2).
+  dpt(_, obj, Spec, X:LF1), ppt(P, abstr, Lbd, Comp, LF2).
 vc(np/np, E, X, Spec, Comp, [Lbd@Y@E, LF1 | LF2]) -->
   dp(_, obj, Spec, Y:LF1), dpt(_, obj, Comp, X:LF2),
   { p(to, abstr, _, Lbd, _, _) }.
@@ -376,7 +376,7 @@ vc(np/np, E, X, Spec, Comp, [Lbd@Y@E, LF1 | LF2]) -->
 
 vv(V_, _, V_, []) --> [].
 vv(V_, E, VV, [Lbd@E, LF1 | LF2]) -->
-  pp(abstr, Lbd, PP, LF1),
+  ppt(_, abstr, Lbd, PP, LF1),
   vv(v_(V_, PP), E, VV, LF2).
 
 
@@ -428,7 +428,7 @@ n_(Agr, N_, X:[Lbd@X | LF]) --> entity(X),
 
 nn(_, N_, _, N_, []) --> [].
 nn(_, N_, X, NN, [Lbd@X, LF1 | LF2]) -->
-  pp(abstr, Lbd, PP, LF1),
+  pp(_, abstr, Lbd, PP, LF1),
   nn(_, n_(N_, PP), X, NN, LF2).
 nn(Agr, N_, X, n_(N_, CP), LF) --> rp(Agr, _, X, CP, LF).
 
@@ -440,16 +440,18 @@ nn(Agr, N_, X, n_(N_, CP), LF) --> rp(Agr, _, X, CP, LF).
 
 %% Prepositional phrase.
 %
-% pp(+Reif, -Lbd, -T, -LF)          Prepositional phrase.
-% pp(+Prep, +Reif, -Lbd, -T, -LF)   PP with pre-bound preposition.
+% pp(+Prep, +Reif, -Lbd, -T, -LF)     PP required.
+% ppt(+Prep, +Reif, -Lbd, -T, -LF)    Either PP or trace.
 
-pp(Reif, Lbd, PP, LF) --> pp(_, Reif, Lbd, PP, LF).
 pp(Prep, abstr, Lbd@X, pp(P, DP), LF) -->
   p(Prep, abstr, P, Lbd),
-  dp(_, pp, DP, X:LF).
+  dpt(_, obj, DP, X:LF).
 pp(Prep, reify, Lbd@E@X, pp(P, DP), E:LF) --> event(E),
   p(Prep, reify, P, Lbd),
-  dp(_, pp, DP, X:LF).
+  dpt(_, obj, DP, X:LF).
+
+ppt(Prep, Reif, Lbd, PP, LF) --> pp(Prep, Reif, Lbd, PP, LF).
+ppt(Prep, _, Lbd@X, pp(t/N), []) --> cstack_pop(pp, X:Lbd, N, Prep).
 
 
 %% ap(-T, -LF)
