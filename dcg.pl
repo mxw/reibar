@@ -97,18 +97,18 @@ cstack_pop(CType, LF, N, Data) --> [],
 %  Complementizer grammar.
 %
 
-%% Sentence.
+%% s(-T, -I)
 %
-% Initialize a new complementizer stack, parse a CP, then ensure that the stack
-% is emptied.
+% Sentence.  Initialize the system and parse a CP.
 
 s(CPt, CPi) --> {cstack_init}, cp(CPt, CPi), {cstack_empty}.
 
 
-%% Complementizer phrases.
+%% cp(-T, -I)
 %
-% We push specifiers and heads of CP's onto a sentence-local complementizer
-% stack---this is used to pass them to their usual position in the sentence.
+% Complementizer phrase.  We push specifiers and heads of CP's onto a
+% sentence-local complementizer stack---this is used to pass them to their
+% usual position in the sentence.
 
 cp(cp(C_t), C_i) --> c_(C_t, C_i).
 
