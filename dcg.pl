@@ -117,7 +117,7 @@ s(CP, CPi) --> {cstack_init}, cp(CP, CPi), {cstack_empty}.
 % sentence-local complementizer stack---this is used to pass them to their
 % usual position in the sentence.
 
-cp(cp(C_), C_i) --> c_(C_, C_i).
+cp(cp(C_), LF) --> c_(C_, LF).
 
 %cp(cp(dp(d_(np(n_(n(N/W))))), C_), C_i) -->
 %  wp(W, _, WPi),
@@ -125,7 +125,7 @@ cp(cp(C_), C_i) --> c_(C_, C_i).
 %  c_(C_, C_i),
 %  { cstack_depth(Depth) }.
 
-c_(c_(IP), IPi) --> ip(IP, IPi).
+c_(c_(IP), LF) --> ip(IP, LF).
 
 % Auxiliary complementizer.
 c_(c_(c(N/Aux), IP), IPi) -->
