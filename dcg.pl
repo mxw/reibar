@@ -414,9 +414,9 @@ vclf(V, DP, PP, x^PP@(V@DP@x)).
 % Verb adjuncts.  Adjoins prepositional phrases to verb bars.
 
 vv(V_, _, V_, []) --> [].
-vv(V_, V_i, VV, VVi) -->
-  pp(PP, PPi),
-  vv(v_(V_, PP), x^PPi@(V_i@x), VV, VVi).
+vv(V_, E, VV, [Lbd@E, LF1, LF2]) -->
+  pp(abstr, Lbd, PP, LF1),
+  vv(v_(V_, PP), E, VV, LF2).
 
 
 %------------------------------------------------------------------------------
@@ -467,10 +467,9 @@ n_(Agr, N_, X:[Lbd@X | LF]) --> entity(X),
 % bars.
 
 nn(_, N_, _, N_, []) --> [].
-nn(_, N_, N_i, NN, NNi) -->
-  pp(PP, PPi),
-  { and(N_i, PPi, And) },
-  nn(_, n_(N_, PP), And, NN, NNi).
+nn(_, N_, X, NN, [Lbd@X, LF1, LF2]) -->
+  pp(abstr, Lbd, PP, LF1),
+  nn(_, n_(N_, PP), X, NN, LF2).
 nn(Agr, N_, N_i, n_(N_, CP), CPi) --> rp(Agr, _, CP, CPi).
 
 
@@ -482,10 +481,15 @@ nn(Agr, N_, N_i, n_(N_, CP), CPi) --> rp(Agr, _, CP, CPi).
 %% Prepositional phrases.
 %
 % pp(-T, -LF)         Prepositional phrase.
-% pp(Prep, -T, -LF)   PP with pre-bound preposition.
+% pp(+Prep, -T, -LF)  PP with pre-bound preposition.
 
-pp(PP, PPi) --> pp(_, PP, PPi).
-pp(Prep, pp(P, DP), Pi@DPi) --> p(Prep, P, Pi), dp(_, DP, DPi).
+pp(Reif, Lbd, PP, LF) --> pp(_, Reif, Lbd, PP, LF).
+pp(Prep, abstr, Lbd@X, pp(P, DP), LF) -->
+  p(Prep, abstr, P, Lbd),
+  dp(_, DP, X:LF).
+pp(Prep, reify, Lbd@E@X, pp(P, DP), E:LF) --> event(E),
+  p(Prep, reify, P, Lbd),
+  dp(_, DP, X:LF).
 
 
 %% ap(-T, -LF)
@@ -632,8 +636,11 @@ d(Num/3, d(D), p^term@Q@(x^p@x)) --> [D], {det(D, Num, Q)}.
   det(every, sg, every).
 
 % Prepositions.
-p(P, p(P), x^y^P@y@x) --> [P], {prep(P)}.
-p(P, p(P), x^y^P@y@x) --> [P1, P2], {prep(P1, P2), atom_concat(P1, P2, P)}.
+p(P, reify, p(P), s^x^y^P@s@y@x) --> p(P).
+p(P, abstr, p(P), x^y^P@y@x) --> p(P).
+
+p(P) --> [P], {prep(P)}.
+p(P) --> [P1, P2], {prep(P1, P2), atom_concat(P1, P2, P)}.
 
   prep(above).
   prep(at).
