@@ -409,7 +409,7 @@ vc(np/np, V, Spec, dp(t/N), (P@IO)@VPi) -->
 vclf(V, DP, PP, x^PP@(V@DP@x)).
 
 
-%% vv(+V_, +V_i, -T, -LF)
+%% vv(+V_, +E, -T, -LF)
 %
 % Verb adjuncts.  Adjoins prepositional phrases to verb bars.
 
@@ -461,7 +461,7 @@ n_(Agr, N_, X:[Lbd@X | LF]) --> entity(X),
 %  nn(Agr, n_(AP, N), NA, N_, N_i).
 
 
-%% nn(+Agr, +N_, +N_i, -T, -LF)
+%% nn(+Agr, +N_, +X, -T, -LF)
 %
 % Noun adjuncts.  Adjoins prepositional phrases and relative clauses to noun
 % bars.
@@ -480,8 +480,8 @@ nn(Agr, N_, N_i, n_(N_, CP), CPi) --> rp(Agr, _, CP, CPi).
 
 %% Prepositional phrases.
 %
-% pp(-T, -LF)         Prepositional phrase.
-% pp(+Prep, -T, -LF)  PP with pre-bound preposition.
+% pp(+Reif, -Lbd, -T, -LF)          Prepositional phrase.
+% pp(+Prep, +Reif, -Lbd, -T, -LF)   PP with pre-bound preposition.
 
 pp(Reif, Lbd, PP, LF) --> pp(_, Reif, Lbd, PP, LF).
 pp(Prep, abstr, Lbd@X, pp(P, DP), LF) -->
@@ -627,7 +627,10 @@ verb(F1, F2, F3, F4, F5, simp, Fs) :- verb(F1, F2, F3, F4, F5, Fs).
 %  Particles lexicon.
 %
 
+%% d(?Agr, -T, -LF)
+%
 % Determiners.
+
 d(Num/3, d(D), p^term@Q@(x^p@x)) --> [D], {det(D, Num, Q)}.
 
   det(a,     sg, some).
@@ -635,7 +638,11 @@ d(Num/3, d(D), p^term@Q@(x^p@x)) --> [D], {det(D, Num, Q)}.
   det(some,  _,  some).
   det(every, sg, every).
 
+
+%% p(?P, +Reif, -T, -LF)
+%
 % Prepositions.
+
 p(P, reify, p(P), s^x^y^P@s@y@x) --> p(P).
 p(P, abstr, p(P), x^y^P@y@x) --> p(P).
 
