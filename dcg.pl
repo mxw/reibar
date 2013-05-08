@@ -155,19 +155,19 @@ cp(cp(C_), LF) --> c_(C_, LF).
 c_(c_(IP), LF) --> ip(IP, LF).
 
 % Auxiliary complementizer.
-c_(c_(c(N/Aux), IP), IPi) -->
-  aux(Agr, Tns, Gov, Aux, LF),
+c_(c_(c(N/Aux), IP), LF) -->
+  aux(Agr, Tns, Gov, Aux, Lbd),
   { finite(Tns) },
-  cstack_push(aux, LF, N, Depth, Tns/Gov),
-  ip(Agr, _, Gov, IP, IPi),
+  cstack_push(aux, Lbd, N, Depth, Tns/Gov),
+  ip(Agr, _, Gov, IP, LF),
   { cstack_depth(Depth) }.
 
 % Main verb complementizer (be/have).
-c_(c_(c(N/V), IP), IPi) -->
-  v(Agr, Tns, Gov, Sub, v(V), LF),
+c_(c_(c(N/V), IP), LF) -->
+  v(Agr, Tns, Gov, Sub, v(V), Lbd),
   { finite(Tns), aspect(Gov) },
-  cstack_push(verb, LF, N, Depth, Tns/Sub),
-  ip(Agr, _, simp, IP, IPi),
+  cstack_push(verb, Lbd, N, Depth, Tns/Sub),
+  ip(Agr, _, simp, IP, LF),
   { cstack_depth(Depth) }.
 
 
