@@ -152,7 +152,7 @@ cp(cp(C_), LF) --> c_(C_, LF).
 %  c_(C_, C_i),
 %  { cstack_depth(Depth) }.
 
-c_(c_(IP), LF) --> ip(IP, LF).
+c_(c_(IP), LF) --> ip(_, IP, LF).
 
 % Auxiliary complementizer.
 c_(c_(c(N/Aux), IP), LF) -->
@@ -178,8 +178,7 @@ c_(c_(c(N/V), IP), LF) -->
 
 rp(Agr, Hum, X, cp(Wh, c_(C, IP)), LF) -->
   rrel(X, Hum, Depth, Wh, C),
-  ip(Agr, Tns, _, IP, LF),
-  { finite(Tns) },
+  ip(Agr, IP, LF),
   { cstack_depth(Depth) }.
 
 
@@ -191,12 +190,12 @@ rp(Agr, Hum, X, cp(Wh, c_(C, IP)), LF) -->
 % Subject.
 rel(X, Hum, Depth, dp(N/Wh), c([])) -->
   whpro(Wh, nom, Hum, bound),
-  cstack_push(nom, X, N, Depth, _).
+  cstack_push(sbj, X, N, Depth, _).
 
 % Object of verb or stranded preposition (detached).
 rel(X, Hum, Depth, dp(N/Wh), c([])) -->
   whpro(Wh, obl, Hum, bound),
-  cstack_push(obl, X, N, Depth, _).
+  cstack_push(obj, X, N, Depth, _).
 
 % Object of fronted preposition (attached).
 rel(X, Hum, Depth, pp(P, N/Wh), c([])) -->
@@ -217,11 +216,11 @@ rel(X, Hum, Depth, pp(P, N/Wh), c([])) -->
 rrel(X, Hum, Depth, Wh, C) --> rel(X, Hum, Depth, Wh, C).
 
 rrel(X, _, Depth, dp(N/wh), c(that)) --> [that],
-  cstack_push(nom, X, N, Depth, _).
+  cstack_push(sbj, X, N, Depth, _).
 rrel(X, _, Depth, dp(N/wh), c(that)) --> [that],
-  cstack_push(obl, X, N, Depth, _).
+  cstack_push(obj, X, N, Depth, _).
 rrel(X, _, Depth, dp(N/wh), c([])) -->
-  cstack_push(obl, X, N, Depth, _).
+  cstack_push(obj, X, N, Depth, _).
 
 
 %% nrel(+Hum, -Depth, -Wt, -C)
@@ -238,23 +237,17 @@ nrel(X, Hum, Depth, Wh, C) --> rel(X, Hum, Depth, Wh, C).
 
 %% Inflectional phrase.
 %
-% ip(-T, -LF)                     Null complementizer phrase.
-% ip(+Agr, ?Tns, ?Gov, -T, -LF)   Nonzero complementizer phrase.
+% ip(+Agr, -T, -LF)               Null or DP complementizer.
+% ip(+Agr, ?Tns, ?Gov, -T, -LF)   Verb complementizer.
 
-ip(ip(DP, I_), [Tns@E, Vld@X, LF2, LF1]) -->
-  dp(Agr, DP, X:LF1),
+ip(Agr, ip(DP, I_), [Tns@E, Vld@X, LF2, LF1]) -->
+  dpt(Agr, sbj, DP, X:LF1),
   i_(Agr, Tns, _, Vld, I_, E:LF2),
   { finite(Tns) }.
 
 ip(Agr, Tns, Gov, ip(DP, I_), [Tns@E, Vld@X, LF2, LF1]) -->
-  dp(Agr, DP, X:LF1),
+  dp(Agr, sbj, DP, X:LF1),
   i_(_, Tns, Gov, Vld, I_, E:LF2).
-
-% Relative clause with subject gap.
-ip(Agr, Tns, _, ip(dp(t/N), I_), [Tns@E, Vld@X, LF]) -->
-  { case_role(Case, sbj) },
-  cstack_pop(Case, X, N, _),
-  i_(Agr, Tns, _, Vld, I_, E:LF).
 
 i_(Agr, Tns, Gov, Vld, i_(i(Tns), II), LF) --> ii(Agr, Tns, Gov, Vld, II, LF).
 
@@ -363,20 +356,13 @@ v_(Agr, Tns, Lbd@E, V_, E:LF) --> event(E),
 
 v_(Agr, Tns, Lbd@E@X, V_, E:[LF1 | LF2]) --> event(E),
   vopt(Agr, Tns, np, V, Lbd),
-  dp(_, DP, X:LF1),
+  dpt(_, obj, DP, X:LF1),
   vv(v_(V, DP), E, V_, LF2).
 
 %v_(Agr, Tns, V_, V_i) --> event(E),
 %  vopt(Agr, Tns, a, V, Lbd),
 %  ap(AP, APi),
 %  vv(v_(V, AP), Vi@APi, V_, V_i).
-
-% Relative clause with object gap.
-v_(Agr, Tns, Lbd@E@X, V_, E:LF) --> event(E),
-  v(Agr, Tns, np, V, Lbd),
-  cstack_pop(Case, X, N, _),
-  { case_role(Case, obj) },
-  vv(v_(V, dp(t/N)), E, V_, LF).
 
 
 %% vc(+Sub, +E, -X, -Spec, -Comp, -LF)
@@ -387,17 +373,11 @@ v_(Agr, Tns, Lbd@E@X, V_, E:LF) --> event(E),
 % the entity of the object.
 
 vc(np/pp, E, X, Spec, Comp, [LF1, LF2]) -->
-  dp(_, Spec, X:LF1), pp(abstr, E, Comp, LF2).
+  dp(_, obj, Spec, X:LF1), pp(abstr, E, Comp, LF2).
 vc(np/P,  E, X, Spec, Comp, [LF1, LF2]) -->
-  dp(_, Spec, X:LF1), pp(abstr, P, E, Comp, LF2).
-vc(np/np, E, X, Spec, Comp, [Lbd@Y@E, LF1, LF2]) -->
-  dp(_, Spec, Y:LF1), dp(_, Comp, X:LF2),
-  { p(to, abstr, _, Lbd, _, _) }.
-
-% Relative clause with complement gap.
-vc(np/np, E, X, Spec, dp(t/N), [Lbd@Y@E | LF]) -->
-  { case_role(Case, obj) },
-  dp(_, Spec, Y:LF), cstack_pop(Case, X, N, _),
+  dp(_, obj, Spec, X:LF1), pp(abstr, P, E, Comp, LF2).
+vc(np/np, E, X, Spec, Comp, [Lbd@Y@E, LF1 | LF2]) -->
+  dp(_, obj, Spec, Y:LF1), dpt(_, obj, Comp, X:LF2),
   { p(to, abstr, _, Lbd, _, _) }.
 
 
@@ -416,19 +396,26 @@ vv(V_, E, VV, [Lbd@E, LF1, LF2]) -->
 %  Determiner and noun grammar.
 %
 
-%% dp(+Agr, -T, -LF)
+%% Determiner phrase.
 %
-% Determiner phrase.
+% dp(+Agr, +Role, -T, -LF)    DP required.
+% dpt(+Agr, +Role, -T, -LF)   Either DP or trace.
 
-dp(Agr, dp(D_), LF) --> d_(Agr, D_, LF).
+dp(Agr, Role, dp(D_), LF) --> d_(Agr, Role, D_, LF).
+
+dpt(Agr, Role, DP, LF) --> dp(Agr, Role, DP, LF).
+dpt(_, Role, dp(t/N), X:[]) --> cstack_pop(Role, X, N, _).
 
 
-%% d_(+Agr, -T, -LF)
+%% d_(+Agr, +Role, -T, -LF)
 %
 % Determiner bar.
 
-d_(Agr, d_(np(n_(PR))), X:[]) --> pr(Agr, PR, X).
-d_(Agr, d_(D, NP), LF) --> d(Agr, D, _), np(Agr, NP, LF).
+d_(Agr, Role, d_(np(n_(N))), X:[]) -->
+  pn(Agr, Case, N, X),
+  {case_role(Case, Role)}.
+d_(Agr, _, d_(np(n_(N))), X:[]) --> pr(Agr, N, X).
+d_(Agr, _, d_(D, NP), LF) --> d(Agr, D, _), np(Agr, NP, LF).
 
 
 %% np(+Agr, -T, -LF)
@@ -478,10 +465,10 @@ nn(Agr, N_, X, n_(N_, CP), LF) --> rp(Agr, _, X, CP, LF).
 pp(Reif, Lbd, PP, LF) --> pp(_, Reif, Lbd, PP, LF).
 pp(Prep, abstr, Lbd@X, pp(P, DP), LF) -->
   p(Prep, abstr, P, Lbd),
-  dp(_, DP, X:LF).
+  dp(_, pp, DP, X:LF).
 pp(Prep, reify, Lbd@E@X, pp(P, DP), E:LF) --> event(E),
   p(Prep, reify, P, Lbd),
-  dp(_, DP, X:LF).
+  dp(_, pp, DP, X:LF).
 
 
 %% ap(-T, -LF)
@@ -671,15 +658,15 @@ case_role(obl, obj).
 case_role(gpn, _).
 
 
-% pn(?Agr, ?Case, ?P)
+% pn(?Agr, ?Case, -T, -LF)
 %
 % Personal pronouns.
 
-pn(Agr, nom,  P) --> [P], {pro(Agr, P, _, _, _, _)}.
-pn(Agr, obl,  P) --> [P], {pro(Agr, _, P, _, _, _)}.
-pn(Agr, pos,  P) --> [P], {pro(Agr, _, _, P, _, _)}.
-pn(Agr, gpn,  P) --> [P], {pro(Agr, _, _, _, P, _)}.
-pn(Agr, refl, P) --> [P], {pro(Agr, _, _, _, _, P)}.
+pn(Agr, nom,  n(N), N) --> [N], {pro(Agr, N, _, _, _, _)}.
+pn(Agr, obl,  n(N), N) --> [N], {pro(Agr, _, N, _, _, _)}.
+pn(Agr, pos,  n(N), N) --> [N], {pro(Agr, _, _, N, _, _)}.
+pn(Agr, gpn,  n(N), N) --> [N], {pro(Agr, _, _, _, N, _)}.
+pn(Agr, refl, n(N), N) --> [N], {pro(Agr, _, _, _, _, N)}.
 
   pro(sg/1, i,    me,   my,     mine,   myself).
   pro(sg/2, you,  you,  your,   yours,  yourself).
