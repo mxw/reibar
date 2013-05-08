@@ -361,10 +361,10 @@ v_(Agr, Tns, Lbd@E@X, V_, E:[LF1 | LF2]) --> event(E),
 % specifier and complement in the tree; E and X are the event of the verb and
 % the entity of the object.
 
-vc(np/pp, E, X, Spec, Comp, [LF1, LF2]) -->
-  dp(_, obj, Spec, X:LF1), pp(abstr, E, Comp, LF2).
-vc(np/P,  E, X, Spec, Comp, [LF1, LF2]) -->
-  dp(_, obj, Spec, X:LF1), pp(abstr, P, E, Comp, LF2).
+vc(np/pp, E, X, Spec, Comp, [Lbd@E, LF1 | LF2]) -->
+  dp(_, obj, Spec, X:LF1), pp(abstr, Lbd, Comp, LF2).
+vc(np/P,  E, X, Spec, Comp, [Lbd@E, LF1 | LF2]) -->
+  dp(_, obj, Spec, X:LF1), pp(P, abstr, Lbd, Comp, LF2).
 vc(np/np, E, X, Spec, Comp, [Lbd@Y@E, LF1 | LF2]) -->
   dp(_, obj, Spec, Y:LF1), dpt(_, obj, Comp, X:LF2),
   { p(to, abstr, _, Lbd, _, _) }.
@@ -375,7 +375,7 @@ vc(np/np, E, X, Spec, Comp, [Lbd@Y@E, LF1 | LF2]) -->
 % Verb adjunct.  Adjoins prepositional phrases to verb bars.
 
 vv(V_, _, V_, []) --> [].
-vv(V_, E, VV, [Lbd@E, LF1, LF2]) -->
+vv(V_, E, VV, [Lbd@E, LF1 | LF2]) -->
   pp(abstr, Lbd, PP, LF1),
   vv(v_(V_, PP), E, VV, LF2).
 
@@ -427,7 +427,7 @@ n_(Agr, N_, X:[Lbd@X | LF]) --> entity(X),
 % bars.
 
 nn(_, N_, _, N_, []) --> [].
-nn(_, N_, X, NN, [Lbd@X, LF1, LF2]) -->
+nn(_, N_, X, NN, [Lbd@X, LF1 | LF2]) -->
   pp(abstr, Lbd, PP, LF1),
   nn(_, n_(N_, PP), X, NN, LF2).
 nn(Agr, N_, X, n_(N_, CP), LF) --> rp(Agr, _, X, CP, LF).
