@@ -146,15 +146,19 @@ s(CP, LF) -->
 
 cp(cp(C_), LF) --> c_(C_, LF).
 
+cp(cp(Wh, C_), LF) --> entity(X),
+  rel(X, _, _, Depth, Wh, _),
+  c_(C_, LF),
+  { cstack_depth(Depth) }.
+
 c_(c_(IP), LF) --> ip(IP, LF).
 
 % Auxiliary complementizer.
 c_(c_(c(N/Aux), IP), LF) -->
   aux(Agr, Tns, Gov, Aux, Lbd),
   { finite(Tns) },
-  cstack_push(aux, Lbd, N, Depth, Tns/Gov),
-  ip(Agr, _, Gov, IP, LF),
-  { cstack_depth(Depth) }.
+  cstack_push(aux, Lbd, N, _, Tns/Gov),
+  ip(Agr, _, Gov, IP, LF).
 
 % Main verb complementizer (be/have).
 c_(c_(c(N/V), IP), LF) -->
