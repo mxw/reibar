@@ -236,7 +236,7 @@ nrel(X, Hum, Depth, Wh, C) --> rel(X, Hum, Depth, Wh, C).
 %  Inflection grammar.
 %
 
-%% Inflectional phrases.
+%% Inflectional phrase.
 %
 % ip(-T, -LF)                     Null complementizer phrase.
 % ip(+Agr, ?Tns, ?Gov, -T, -LF)   Nonzero complementizer phrase.
@@ -341,7 +341,7 @@ vopt(_, Tns, Sub, v(t/N), LF) --> cstack_pop(verb, LF, N, Tns/Sub).
 
 %% vp(+Agr, -Tns, -Vld, -T, -LF)
 %
-% Verb phrases.  We delegate verb subcategories with one or two theta roles to
+% Verb phrase.  We delegate verb subcategories with one or two theta roles to
 % v_/4 and those with three theta roles to vc/5.
 
 vp(Agr, Tns, Lbd, vp(V_), LF) --> v_(Agr, Tns, Lbd, V_, LF).
@@ -381,7 +381,7 @@ v_(Agr, Tns, Lbd@E@X, V_, E:LF) --> event(E),
 
 %% vc(+Sub, +E, -X, -Spec, -Comp, -LF)
 %
-% Verb complements.  Used for verbs with three theta roles in order to properly
+% Verb complement.  Used for verbs with three theta roles in order to properly
 % generate the syntax tree and handle synonymity.  Spec and Comp are the
 % specifier and complement in the tree; E and X are the event of the verb and
 % the entity of the object.
@@ -403,7 +403,7 @@ vc(np/np, E, X, Spec, dp(t/N), [Lbd@Y@E | LF]) -->
 
 %% vv(+V_, +E, -T, -LF)
 %
-% Verb adjuncts.  Adjoins prepositional phrases to verb bars.
+% Verb adjunct.  Adjoins prepositional phrases to verb bars.
 
 vv(V_, _, V_, []) --> [].
 vv(V_, E, VV, [Lbd@E, LF1, LF2]) -->
@@ -418,14 +418,14 @@ vv(V_, E, VV, [Lbd@E, LF1, LF2]) -->
 
 %% dp(+Agr, -T, -LF)
 %
-% Determiner phrases.
+% Determiner phrase.
 
 dp(Agr, dp(D_), LF) --> d_(Agr, D_, LF).
 
 
 %% d_(+Agr, -T, -LF)
 %
-% Determiner bars.
+% Determiner bar.
 
 d_(Agr, d_(np(n_(PR))), X:[]) --> pr(Agr, PR, X).
 d_(Agr, d_(D, NP), LF) --> d(Agr, D, _), np(Agr, NP, LF).
@@ -433,14 +433,14 @@ d_(Agr, d_(D, NP), LF) --> d(Agr, D, _), np(Agr, NP, LF).
 
 %% np(+Agr, -T, -LF)
 %
-% Noun phrases.
+% Noun phrase.
 
 np(Agr, np(N_), LF) --> n_(Agr, N_, LF).
 
 
 %% n_(+Agr, -T, -LF)
 %
-% Noun bars.
+% Noun bar.
 
 n_(Agr, N_, X:[Lbd@X | LF]) --> entity(X),
   n(Agr, N, Lbd),
@@ -455,7 +455,7 @@ n_(Agr, N_, X:[Lbd@X | LF]) --> entity(X),
 
 %% nn(+Agr, +N_, +X, -T, -LF)
 %
-% Noun adjuncts.  Adjoins prepositional phrases and relative clauses to noun
+% Noun adjunct.  Adjoins prepositional phrases and relative clauses to noun
 % bars.
 
 nn(_, N_, _, N_, []) --> [].
@@ -470,7 +470,7 @@ nn(Agr, N_, X, n_(N_, CP), LF) --> rp(Agr, _, X, CP, LF).
 %  Preposition and adjective grammar.
 %
 
-%% Prepositional phrases.
+%% Prepositional phrase.
 %
 % pp(+Reif, -Lbd, -T, -LF)          Prepositional phrase.
 % pp(+Prep, +Reif, -Lbd, -T, -LF)   PP with pre-bound preposition.
@@ -486,7 +486,7 @@ pp(Prep, reify, Lbd@E@X, pp(P, DP), E:LF) --> event(E),
 
 %% ap(-T, -LF)
 %
-% Adjective phrases.
+% Adjective phrase.
 
 ap(ap(a_(A)), Ai) --> a(A, Ai).
 
