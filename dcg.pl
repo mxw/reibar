@@ -146,7 +146,7 @@ s(CP, LF) -->
 
 cp(cp(C_), LF) --> c_(C_, LF).
 
-c_(c_(IP), LF) --> ip(_, IP, LF).
+c_(c_(IP), LF) --> ip(IP, LF).
 
 % Auxiliary complementizer.
 c_(c_(c(N/Aux), IP), LF) -->
@@ -172,7 +172,7 @@ c_(c_(c(N/V), IP), LF) -->
 
 rp(Agr, Hum, X, cp(Wh, c_(C, IP)), LF) -->
   rrel(X, Agr, Hum, Depth, Wh, C),
-  ip(Agr, IP, LF),
+  ip(IP, LF),
   { cstack_depth(Depth) }.
 
 
@@ -231,10 +231,10 @@ nrel(X, Agr, Hum, Depth, Wh, C) --> rel(X, Agr, Hum, Depth, Wh, C).
 
 %% Inflectional phrase.
 %
-% ip(+Agr, -T, -LF)               Null or DP complementizer.
+% ip(-T, -LF)                     Null or DP complementizer.
 % ip(+Agr, ?Tns, ?Gov, -T, -LF)   Verb complementizer.
 
-ip(Agr, ip(DP, I_), [Tns@E, Vld@X, LF2, LF1]) -->
+ip(ip(DP, I_), [Tns@E, Vld@X, LF2, LF1]) -->
   dpt(Agr, sbj, DP, X:LF1),
   i_(Agr, Tns, _, Vld, I_, E:LF2),
   { finite(Tns) }.
