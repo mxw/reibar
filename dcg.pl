@@ -346,11 +346,11 @@ vopt(_, Tns, Sub, v(t/N), LF) --> cstack_pop(verb, LF, N, Tns/Sub).
 
 vp(Agr, Tns, Lbd, vp(V_), LF) --> v_(Agr, Tns, Lbd, V_, LF).
 
-vp(Agr, Tns, vp(v_(v(N/v), vp(Spec, V_))), V_i) -->
-  v(Agr, Tns, Sub, v(V), Vi),
-  vc(Sub, Vi, Spec, Comp, VCi),
+vp(Agr, Tns, Lbd@E@X, vp(v_(v(N/v), vp(Spec, V_))), E:[LF1, LF2]) --> event(E),
   { c_incr(N) },
-  vv(v_(v(V/N), Comp), VCi, V_, V_i).
+  v(Agr, Tns, Sub, v(V), Lbd),
+  vc(Sub, E, X, Spec, Comp, LF1),
+  vv(v_(v(V/N), Comp), E, V_, LF2).
 
 
 %% v_(+Agr, -Tns, -Vld, -T, -LF)
@@ -380,22 +380,20 @@ v_(Agr, Tns, VV, VVi) -->
   vv(v_(V, dp(t/N)), V_i, VV, VVi).
 
 
-%% vc(+Sub, -Spec, -Comp, -DP, -PP)
+%% vc(+Sub, +E, -X, -Spec, -Comp, -LF)
 %
 % Verb complements.  Used for verbs with three theta roles in order to properly
 % generate the syntax tree and handle synonymity.  Spec and Comp are the
-% specifier and complement in the tree; VC is the logical form of the phrase.
+% specifier and complement in the tree; E and X are the event of the verb and
+% the entity of the object.
 
-vc(np/pp, V, Spec, Comp, VC) -->
-  dp(_, Spec, DP), pp(Comp, PP),
-  { vclf(V, DP, PP, VC) }.
-vc(np/P, V, Spec, Comp, VC) -->
-  dp(_, Spec, DP), pp(P, Comp, PP),
-  { vclf(V, DP, PP, VC) }.
-vc(np/np, V, Spec, Comp, VC) -->
-  dp(_, Spec, IO), dp(_, Comp, DP),
-  { p(to, _, P, _, _) },
-  { vclf(V, DP, P@IO, VC) }.
+vc(np/pp, E, X, Spec, Comp, [LF1, LF2]) -->
+  dp(_, Spec, X:LF1), pp(abstr, E, Comp, LF2).
+vc(np/P,  E, X, Spec, Comp, [LF1, LF2]) -->
+  dp(_, Spec, X:LF1), pp(abstr, P, E, Comp, LF2).
+vc(np/np, E, X, Spec, Comp, [Lbd@Y@E, LF1, LF2]) -->
+  dp(_, Spec, Y:LF1), dp(_, Comp, X:LF2),
+  { p(to, abstr, _, Lbd, _, _) }.
 
 % Relative clause with complement gap.
 vc(np/np, V, Spec, dp(t/N), (P@IO)@VPi) -->
