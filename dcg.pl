@@ -35,7 +35,7 @@ and(X, Y, x^and@(X@x)@(Y@x)).
 %  We use DCG rules for push and pop, and regular predicates elsewhere.
 %
 
-%% c_reset.
+%% c_reset
 %
 % Reset counter to 0.
 
@@ -45,10 +45,10 @@ c_reset :- b_setval(counter, 0).
 %
 % Increment counter with result N.
 
-c_incr(N1) :-
+c_incr(N_) :-
   b_getval(counter, N),
-  N1 is N + 1,
-  b_setval(counter, N1).
+  N_ is N + 1,
+  b_setval(counter, N_).
 
 %% cstack_init
 %
