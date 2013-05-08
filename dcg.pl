@@ -146,12 +146,6 @@ s(CP, LF) -->
 
 cp(cp(C_), LF) --> c_(C_, LF).
 
-%cp(cp(dp(d_(np(n_(n(N/W))))), C_), C_i) -->
-%  wp(W, _, WPi),
-%  cstack_push(rel, WPi, N, Depth, W),
-%  c_(C_, C_i),
-%  { cstack_depth(Depth) }.
-
 c_(c_(IP), LF) --> ip(_, IP, LF).
 
 % Auxiliary complementizer.
@@ -359,11 +353,6 @@ v_(Agr, Tns, Lbd@E@X, V_, E:[LF1 | LF2]) --> event(E),
   dpt(_, obj, DP, X:LF1),
   vv(v_(V, DP), E, V_, LF2).
 
-%v_(Agr, Tns, V_, V_i) --> event(E),
-%  vt(Agr, Tns, a, V, Lbd),
-%  ap(AP, APi),
-%  vv(v_(V, AP), Vi@APi, V_, V_i).
-
 
 %% vc(+Sub, +E, -X, -Spec, -Comp, -LF)
 %
@@ -432,12 +421,6 @@ np(Agr, np(N_), LF) --> n_(Agr, N_, LF).
 n_(Agr, N_, X:[Lbd@X | LF]) --> entity(X),
   n(Agr, N, Lbd),
   nn(Agr, n_(N), X, N_, LF).
-
-%n_(Agr, N_, N_i) -->
-%  ap(AP, APi),
-%  n(Agr, N, Ni),
-%  { and(Ni, APi, NA) },
-%  nn(Agr, n_(AP, N), NA, N_, N_i).
 
 
 %% nn(+Agr, +N_, +X, -T, -LF)
