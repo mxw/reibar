@@ -171,28 +171,28 @@ c_(c_(c(N/V), IP), LF) -->
 % distinct rules for construction.
 
 rp(Agr, Hum, X, cp(Wh, c_(C, IP)), LF) -->
-  rrel(X, Hum, Depth, Wh, C),
+  rrel(X, Agr, Hum, Depth, Wh, C),
   ip(Agr, IP, LF),
   { cstack_depth(Depth) }.
 
 
-%% rel(+X, +Hum, -Depth, -Wh, -C)
+%% rel(+X, +Agr, +Hum, -Depth, -Wh, -C)
 %
 % Relativizer.  Hum is the antecedent's humanity---personal or impersonal, and
 % in the latter case, also location, time, etc.
 
 % Subject.
-rel(X, Hum, Depth, dp(N/Wh), c([])) -->
+rel(X, Agr, Hum, Depth, dp(N/Wh), c([])) -->
   whpro(Wh, nom, Hum, bound),
-  cstack_push(sbj, X, N, Depth, _).
+  cstack_push(sbj, X, N, Depth, Agr).
 
 % Object of verb or stranded preposition (detached).
-rel(X, Hum, Depth, dp(N/Wh), c([])) -->
+rel(X, _, Hum, Depth, dp(N/Wh), c([])) -->
   whpro(Wh, obl, Hum, bound),
   cstack_push(obj, X, N, Depth, _).
 
 % Object of fronted preposition (attached).
-rel(X, Hum, Depth, pp(P, N/Wh), c([])) -->
+rel(X, _, Hum, Depth, pp(P, N/Wh), c([])) -->
   p(Prep, abstr, P, Lbd),
   whpro(Wh, obl, Hum, bound),
   cstack_push(pp, X:Lbd, N, Depth, Prep).
@@ -203,25 +203,25 @@ rel(X, Hum, Depth, pp(P, N/Wh), c([])) -->
   %cstack_push(gpn, X, N, Depth, Wh).
 
 
-%% rrel(+X, +Hum, -Depth, -Wt, -C)
+%% rrel(+X, +Agr, +Hum, -Depth, -Wt, -C)
 %
 % Restrictive relativizer.  Additionally includes `that' and null relativizers.
 
-rrel(X, Hum, Depth, Wh, C) --> rel(X, Hum, Depth, Wh, C).
+rrel(X, Agr, Hum, Depth, Wh, C) --> rel(X, Agr, Hum, Depth, Wh, C).
 
-rrel(X, _, Depth, dp(N/[]), c(that)) --> [that],
-  cstack_push(sbj, X, N, Depth, _).
-rrel(X, _, Depth, dp(N/[]), c(that)) --> [that],
+rrel(X, Agr, _, Depth, dp(N/[]), c(that)) --> [that],
+  cstack_push(sbj, X, N, Depth, Agr).
+rrel(X, _, _, Depth, dp(N/[]), c(that)) --> [that],
   cstack_push(obj, X, N, Depth, _).
-rrel(X, _, Depth, dp(N/[]), c([])) -->
+rrel(X, _, _, Depth, dp(N/[]), c([])) -->
   cstack_push(obj, X, N, Depth, _).
 
 
-%% nrel(+Hum, -Depth, -Wt, -C)
+%% nrel(+X, +Agr, +Hum, -Depth, -Wt, -C)
 %
 % Non-restrictive relativizer.  Additionally includes "D NP of which/whom".
 
-nrel(X, Hum, Depth, Wh, C) --> rel(X, Hum, Depth, Wh, C).
+nrel(X, Agr, Hum, Depth, Wh, C) --> rel(X, Agr, Hum, Depth, Wh, C).
 
 
 %------------------------------------------------------------------------------
@@ -393,7 +393,7 @@ vv(V_, E, VV, [Lbd@E, LF1 | LF2]) -->
 dp(Agr, Role, dp(D_), LF) --> d_(Agr, Role, D_, LF).
 
 dpt(Agr, Role, DP, LF) --> dp(Agr, Role, DP, LF).
-dpt(_, Role, dp(t/N), X:[]) --> cstack_pop(Role, X, N, _).
+dpt(Agr, Role, dp(t/N), X:[]) --> cstack_pop(Role, X, N, Agr).
 
 
 %% d_(+Agr, +Role, -T, -LF)
