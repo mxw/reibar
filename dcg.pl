@@ -241,28 +241,28 @@ nrel(Hum, Depth, Wh, C, lf) --> rel(Hum, Depth, Wh, C, _).
 % ip(-T, -LF)                     Null complementizer phrase.
 % ip(+Agr, ?Tns, ?Gov, -T, -LF)   Nonzero complementizer phrase.
 
-ip(ip(DP, I_), [Tns@E, V@X, LF2, LF1]) -->
+ip(ip(DP, I_), [Tns@E, Vld@X, LF2, LF1]) -->
   dp(Agr, DP, X:LF1),
-  i_(Agr, Tns, _, V, I_, E:LF2),
+  i_(Agr, Tns, _, Vld, I_, E:LF2),
   { finite(Tns) }.
 
-ip(Agr, Tns, Gov, ip(DP, I_), [Tns@E, V@X, LF2, LF1]) -->
+ip(Agr, Tns, Gov, ip(DP, I_), [Tns@E, Vld@X, LF2, LF1]) -->
   dp(Agr, DP, X:LF1),
-  i_(_, Tns, Gov, V, I_, E:LF2).
+  i_(_, Tns, Gov, Vld, I_, E:LF2).
 
 % Relative clause with subject gap.
-ip(Agr, Tns, _, ip(dp(t/N), I_), [Tns@E, V@X, LF2, LF1]) -->
+ip(Agr, Tns, _, ip(dp(t/N), I_), [Tns@E, Vld@X, LF2, LF1]) -->
   { case_role(Case, sbj) },
   cstack_pop(Case, X:LF1, N, _),
-  i_(Agr, Tns, _, V, I_, E:LF2).
+  i_(Agr, Tns, _, Vld, I_, E:LF2).
 
-i_(Agr, Tns, Gov, V, i_(i(Tns), II), LF) --> ii(Agr, Tns, Gov, V, II, LF).
+i_(Agr, Tns, Gov, Vld, i_(i(Tns), II), LF) --> ii(Agr, Tns, Gov, Vld, II, LF).
 
-ii(Agr, Tns, mod,  V, VP, LF) --> mp(Agr, Tns, V, VP, LF).
-ii(Agr, Tns, perf, V, VP, LF) --> perfp(Agr, Tns, V, VP, LF).
-ii(Agr, Tns, prog, V, VP, LF) --> progp(Agr, Tns, V, VP, LF).
-ii(Agr, Tns, dsup, V, VP, LF) --> dsup(Agr, Tns, V, VP, LF).
-ii(Agr, Tns, simp, V, VP, LF) --> vp(Agr, Tns, V, VP, LF).
+ii(Agr, Tns, mod,  Vld, VP, LF) --> mp(Agr, Tns, Vld, VP, LF).
+ii(Agr, Tns, perf, Vld, VP, LF) --> perfp(Agr, Tns, Vld, VP, LF).
+ii(Agr, Tns, prog, Vld, VP, LF) --> progp(Agr, Tns, Vld, VP, LF).
+ii(Agr, Tns, dsup, Vld, VP, LF) --> dsup(Agr, Tns, Vld, VP, LF).
+ii(Agr, Tns, simp, Vld, VP, LF) --> vp(Agr, Tns, Vld, VP, LF).
 
 
 %% Modality.
@@ -270,17 +270,17 @@ ii(Agr, Tns, simp, V, VP, LF) --> vp(Agr, Tns, V, VP, LF).
 % mp(+Agr, -Tns, -T, -LF)   Modal phrase.
 % mc(-T, -LF)               Modal complement.
 
-mp(Agr, Tns, V, mp(m(Aux), MC), E:[Pred@E@E_ | LF]) --> event(E),
+mp(Agr, Tns, Vld, mp(m(Aux), MC), E:[Pred@E@E_ | LF]) --> event(E),
   aux(Agr, Tns, mod, Aux, Pred),
-  mc(V, MC, E_:LF).
+  mc(Vld, MC, E_:LF).
 
-mp(_, Tns, V, mp(m(t/N), MC), E:[Pred@E@E_ | LF]) --> event(E),
+mp(_, Tns, Vld, mp(m(t/N), MC), E:[Pred@E@E_ | LF]) --> event(E),
   cstack_pop(aux, Pred, N, Tns/mod),
-  mc(V, MC, E_:LF).
+  mc(Vld, MC, E_:LF).
 
-mc(V, PerfP, LF) --> perfp(_, infin, V, PerfP, LF).
-mc(V, ProgP, LF) --> progp(_, infin, V, ProgP, LF).
-mc(V, VP, LF) --> vp(_, infin, V, VP, LF).
+mc(Vld, PerfP, LF) --> perfp(_, infin, Vld, PerfP, LF).
+mc(Vld, ProgP, LF) --> progp(_, infin, Vld, ProgP, LF).
+mc(Vld, VP, LF) --> vp(_, infin, Vld, VP, LF).
 
 
 %% Perfective aspect.
@@ -288,42 +288,42 @@ mc(V, VP, LF) --> vp(_, infin, V, VP, LF).
 % perfp(+Agr, -Tns, -T, -LF)  Perfective phrase.
 % perfc(-T, -LF)              Perfective complement.
 
-perfp(Agr, Tns, V, perfp(perf(Aux), PerfC), E:[Pred@E@E_ | LF]) --> event(E),
+perfp(Agr, Tns, Vld, perfp(perf(Aux), PerfC), E:[Pred@E@E_ | LF]) --> event(E),
   aux(Agr, Tns, perf, Aux, Pred),
-  perfc(V, PerfC, E_:LF).
+  perfc(Vld, PerfC, E_:LF).
 
-perfp(_, Tns, V, perfp(perf(t/N), PerfC), E:[Pred@E@E_ | LF]) --> event(E),
+perfp(_, Tns, Vld, perfp(perf(t/N), PerfC), E:[Pred@E@E_ | LF]) --> event(E),
   cstack_pop(aux, Pred, N, Tns/perf),
-  perfc(V, PerfC, E_:LF).
+  perfc(Vld, PerfC, E_:LF).
 
-perfc(V, ProgP, LF) --> progp(_, pastp, V, ProgP, LF).
-perfc(V, VP, LF) --> vp(_, pastp, V, VP, LF).
+perfc(Vld, ProgP, LF) --> progp(_, pastp, Vld, ProgP, LF).
+perfc(Vld, VP, LF) --> vp(_, pastp, Vld, VP, LF).
 
 
 %% Progressive aspect.
 %
 % progp(+Agr, -Tns, -T, -LF)  Progressive phrase.
 
-progp(Agr, Tns, V, progp(prog(Aux), VP), E:[Pred@E@E_ | LF]) --> event(E),
+progp(Agr, Tns, Vld, progp(prog(Aux), VP), E:[Pred@E@E_ | LF]) --> event(E),
   aux(Agr, Tns, prog, Aux, Pred),
-  vp(_, presp, V, VP, E_:LF).
+  vp(_, presp, Vld, VP, E_:LF).
 
-progp(_, Tns, V, progp(prog(t/N), VP), E:[Pred@E@E_ | LF]) --> event(E),
+progp(_, Tns, Vld, progp(prog(t/N), VP), E:[Pred@E@E_ | LF]) --> event(E),
   cstack_pop(aux, Pred, N, Tns/prog),
-  vp(_, presp, V, VP, E_:LF).
+  vp(_, presp, Vld, VP, E_:LF).
 
 
 %% Do-support.
 %
 % dsup(+Agr, -Tns, -T, -LF)   Fill `do' into Tns.
 
-dsup(Agr, Do, V, VP, LF) -->
+dsup(Agr, Do, Vld, VP, LF) -->
   aux(Agr, _, dsup, Do, _),
-  vp(_, infin, V, VP, LF).
+  vp(_, infin, Vld, VP, LF).
 
-dsup(_, t/N, V, VP, LF) -->
+dsup(_, t/N, Vld, VP, LF) -->
   cstack_pop(aux, _, N, _/dsup),
-  vp(_, infin, V, VP, LF).
+  vp(_, infin, Vld, VP, LF).
 
 
 %------------------------------------------------------------------------------
