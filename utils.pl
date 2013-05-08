@@ -10,7 +10,9 @@
    $Id: blocksqa.pl,v 1.1 2011/02/13 22:28:01 shieber Exp shieber $
    ------------------------------------------------------------------------ */
 
+:- module(utils, [notation/2]).
 :- use_module(library(lists)).
+:- use_module(betanf).
 
 %%% notation(+Input, -Output)
 %%%

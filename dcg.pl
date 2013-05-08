@@ -4,8 +4,9 @@
 %
 
 :- module(dcg, [sentence/3]).
-:- use_module(betanf).
 :- use_module(library(lists)).
+:- use_module(betanf).
+:- use_module(utils).
 
 
 %------------------------------------------------------------------------------
@@ -17,9 +18,10 @@
 %
 % String is parsable, its parse is Tree, and its interpretation is Interp.
 
-sentence(String, Tree, Interp) :-
+sentence(String, Tree, LF) :-
   s(Tree, Interp_, String, []),
-  bnf(Interp_, Interp).
+  maplist(bnf, Interp_, Interp),
+  maplist(notation, Interp, LF).
 
 
 %% incr(+Counter, -N)
@@ -31,11 +33,33 @@ incr(Counter, N_) :-
   N_ is N + 1,
   b_setval(Counter, N_).
 
-%% and(+LF1, +LF2, -AndLF)
-%
-% Encoding of logical `and'.
 
-and(X, Y, x^and@(X@x)@(Y@x)).
+%------------------------------------------------------------------------------
+%
+%  Semantics.
+%
+%  We employ a flat, reified logical form for our semantics, based on Hobbs's
+%  "Ontological Promiscuity".  This is built up with nested lists of implicitly
+%  conjuncted predicates, which we eventually flatten.
+%
+
+%% var_init
+%
+% Reset counter to 0.
+
+var_init :- b_setval(event, 0), b_setval(entity, 0).
+
+%% event(-E)
+%
+% Instantiate a new event variable.
+
+event(e/E) --> {incr(event, E)}.
+
+%% entity(-X)
+%
+% Instantiate a new entity variable.
+
+entity(x/X) --> {incr(entity, X)}.
 
 
 %------------------------------------------------------------------------------
@@ -108,7 +132,10 @@ cstack_pop(CType, LF, N, Data) --> [],
 %
 % Sentence.  Initialize the system and parse a CP.
 
-s(CP, CPi) --> {cstack_init}, cp(CP, CPi), {cstack_empty}.
+s(CP, LF) -->
+  {var_init}, {cstack_init},
+  cp(CP, LF_), {flatten(LF_, LF)},
+  {cstack_empty}.
 
 
 %% cp(-T, -LF)
@@ -214,29 +241,28 @@ nrel(Hum, Depth, Wh, C, lf) --> rel(Hum, Depth, Wh, C, _).
 % ip(-T, -LF)                     Null complementizer phrase.
 % ip(+Agr, ?Tns, ?Gov, -T, -LF)   Nonzero complementizer phrase.
 
-ip(ip(DP, I_), I_i@DPi) -->
-  dp(Agr, DP, DPi),
-  i_(Agr, Tns, _, I_, I_i),
+ip(ip(DP, I_), [Tns@E, V@X, LF2, LF1]) -->
+  dp(Agr, DP, X:LF1),
+  i_(Agr, Tns, _, V, I_, E:LF2),
   { finite(Tns) }.
 
-ip(Agr, Tns, Gov, ip(DP, I_), I_i@DPi) -->
-  dp(Agr, DP, DPi),
-  i_(_, Tns, Gov, I_, I_i).
+ip(Agr, Tns, Gov, ip(DP, I_), [Tns@E, V@X, LF2, LF1]) -->
+  dp(Agr, DP, X:LF1),
+  i_(_, Tns, Gov, V, I_, E:LF2).
 
 % Relative clause with subject gap.
-ip(Agr, Tns, _, ip(dp(t/N), I_), IPi) -->
-  cstack_pop(Case, NPi, N, _),
+ip(Agr, Tns, _, ip(dp(t/N), I_), [Tns@E, V@X, LF2, LF1]) -->
   { case_role(Case, sbj) },
-  i_(Agr, Tns, _, I_, I_i),
-  { and(NPi, I_i, IPi) }.
+  cstack_pop(Case, X:LF1, N, _),
+  i_(Agr, Tns, _, V, I_, E:LF2).
 
-i_(Agr, Tns, Gov, i_(i(Tns), II), LF) --> ii(Agr, Tns, Gov, II, LF).
+i_(Agr, Tns, Gov, V, i_(i(Tns), II), LF) --> ii(Agr, Tns, Gov, V, II, LF).
 
-ii(Agr, Tns, mod,  VP, LF) --> mp(Agr, Tns, VP, LF).
-ii(Agr, Tns, perf, VP, LF) --> perfp(Agr, Tns, VP, LF).
-ii(Agr, Tns, prog, VP, LF) --> progp(Agr, Tns, VP, LF).
-ii(Agr, Tns, dsup, VP, LF) --> dsup(Agr, Tns, VP, LF).
-ii(Agr, Tns, simp, VP, LF) --> vp(Agr, Tns, VP, LF).
+ii(Agr, Tns, mod,  V, VP, LF) --> mp(Agr, Tns, V, VP, LF).
+ii(Agr, Tns, perf, V, VP, LF) --> perfp(Agr, Tns, V, VP, LF).
+ii(Agr, Tns, prog, V, VP, LF) --> progp(Agr, Tns, V, VP, LF).
+ii(Agr, Tns, dsup, V, VP, LF) --> dsup(Agr, Tns, V, VP, LF).
+ii(Agr, Tns, simp, V, VP, LF) --> vp(Agr, Tns, V, VP, LF).
 
 
 %% Modality.
@@ -244,18 +270,17 @@ ii(Agr, Tns, simp, VP, LF) --> vp(Agr, Tns, VP, LF).
 % mp(+Agr, -Tns, -T, -LF)   Modal phrase.
 % mc(-T, -LF)               Modal complement.
 
-mp(Agr, Tns, mp(m(Aux), MC), MCi) -->
-  aux(Agr, Tns, mod, Aux, _),
-  \+ cstack_pop(aux, _, _, _/mod),
-  mc(MC, MCi).
+mp(Agr, Tns, V, mp(m(Aux), MC), E:[Pred@E@E_ | LF]) --> event(E),
+  aux(Agr, Tns, mod, Aux, Pred),
+  mc(V, MC, E_:LF).
 
-mp(_, Tns, mp(m(t/N), MC), MCi) -->
-  cstack_pop(aux, _, N, Tns/mod),
-  mc(MC, MCi).
+mp(_, Tns, V, mp(m(t/N), MC), E:[Pred@E@E_ | LF]) --> event(E),
+  cstack_pop(aux, Pred, N, Tns/mod),
+  mc(V, MC, E_:LF).
 
-mc(PerfP, LF) --> perfp(_, infin, PerfP, LF).
-mc(ProgP, LF) --> progp(_, infin, ProgP, LF).
-mc(VP, LF) --> vp(_, infin, VP, LF).
+mc(V, PerfP, LF) --> perfp(_, infin, V, PerfP, LF).
+mc(V, ProgP, LF) --> progp(_, infin, V, ProgP, LF).
+mc(V, VP, LF) --> vp(_, infin, V, VP, LF).
 
 
 %% Perfective aspect.
@@ -263,45 +288,42 @@ mc(VP, LF) --> vp(_, infin, VP, LF).
 % perfp(+Agr, -Tns, -T, -LF)  Perfective phrase.
 % perfc(-T, -LF)              Perfective complement.
 
-perfp(Agr, Tns, perfp(perf(Aux), PerfC), PerfCi) -->
-  aux(Agr, Tns, perf, Aux, _),
-  \+ cstack_pop(aux, _, _, _/perf),
-  perfc(PerfC, PerfCi).
+perfp(Agr, Tns, V, perfp(perf(Aux), PerfC), E:[Pred@E@E_ | LF]) --> event(E),
+  aux(Agr, Tns, perf, Aux, Pred),
+  perfc(V, PerfC, E_:LF).
 
-perfp(_, Tns, perfp(perf(t/N), PerfC), PerfCi) -->
-  cstack_pop(aux, _, N, Tns/perf),
-  perfc(PerfC, PerfCi).
+perfp(_, Tns, V, perfp(perf(t/N), PerfC), E:[Pred@E@E_ | LF]) --> event(E),
+  cstack_pop(aux, Pred, N, Tns/perf),
+  perfc(V, PerfC, E_:LF).
 
-perfc(ProgP, LF) --> progp(_, pastp, ProgP, LF).
-perfc(VP, LF) --> vp(_, pastp, VP, LF).
+perfc(V, ProgP, LF) --> progp(_, pastp, V, ProgP, LF).
+perfc(V, VP, LF) --> vp(_, pastp, V, VP, LF).
 
 
 %% Progressive aspect.
 %
 % progp(+Agr, -Tns, -T, -LF)  Progressive phrase.
 
-progp(Agr, Tns, progp(prog(Aux), VP), VPi) -->
-  aux(Agr, Tns, prog, Aux, _),
-  \+ cstack_pop(aux, _, _, _/prog),
-  vp(_, presp, VP, VPi).
+progp(Agr, Tns, V, progp(prog(Aux), VP), E:[Pred@E@E_ | LF]) --> event(E),
+  aux(Agr, Tns, prog, Aux, Pred),
+  vp(_, presp, V, VP, E_:LF).
 
-progp(_, Tns, progp(prog(t/N), VP), VPi) -->
-  cstack_pop(aux, _, N, Tns/prog),
-  vp(_, presp, VP, VPi).
+progp(_, Tns, V, progp(prog(t/N), VP), E:[Pred@E@E_ | LF]) --> event(E),
+  cstack_pop(aux, Pred, N, Tns/prog),
+  vp(_, presp, V, VP, E_:LF).
 
 
 %% Do-support.
 %
 % dsup(+Agr, -Tns, -T, -LF)   Fill `do' into Tns.
 
-dsup(Agr, Do, VP, VPi) -->
+dsup(Agr, Do, V, VP, LF) -->
   aux(Agr, _, dsup, Do, _),
-  \+ cstack_pop(aux, _, _, _/dsup),
-  vp(_, infin, VP, VPi).
+  vp(_, infin, V, VP, LF).
 
-dsup(_, t/N, VP, VPi) -->
+dsup(_, t/N, V, VP, LF) -->
   cstack_pop(aux, _, N, _/dsup),
-  vp(_, infin, VP, VPi).
+  vp(_, infin, V, VP, LF).
 
 
 %------------------------------------------------------------------------------
@@ -309,15 +331,12 @@ dsup(_, t/N, VP, VPi) -->
 %  Verb grammar.
 %
 
-%% vopt(-Agr, -Tns, -Sub, -Vt, -Vi)
+%% vopt(-Agr, -Tns, -Sub, -V, -LF)
 %
 % Parse a verb or pop one off the complementizer stack.
 
-vopt(Agr, Tns, Sub, V, Vi) -->
-  v(Agr, Tns, Sub, V, Vi),
-  \+ cstack_pop(verb, _, _, _).
-vopt(_, Tns, Sub, v(t/N), Vi) -->
-  cstack_pop(verb, Vi, N, Tns/Sub).
+vopt(Agr, Tns, Sub, V, LF) --> v(Agr, Tns, Sub, V, LF).
+vopt(_, Tns, Sub, v(t/N), LF) --> cstack_pop(verb, LF, N, Tns/Sub).
 
 
 %% vp(+Agr, -Tns, -T, -LF)
@@ -325,7 +344,7 @@ vopt(_, Tns, Sub, v(t/N), Vi) -->
 % Verb phrases.  We delegate verb subcategories with one or two theta roles to
 % v_/4 and those with three theta roles to vc/5.
 
-vp(Agr, Tns, vp(V_), V_i) --> v_(Agr, Tns, V_, V_i).
+vp(Agr, Tns, Pred, vp(V_), LF) --> v_(Agr, Tns, Pred, V_, LF).
 
 vp(Agr, Tns, vp(v_(v(N/v), vp(Spec, V_))), V_i) -->
   v(Agr, Tns, Sub, v(V), Vi),
@@ -338,17 +357,19 @@ vp(Agr, Tns, vp(v_(v(N/v), vp(Spec, V_))), V_i) -->
 %
 % Verb bars for the subcategories `nil', `np', and `a'.
 
-v_(Agr, Tns, V_, V_i) -->
-  vopt(Agr, Tns, nil, V, Vi),
-  vv(v_(V), Vi, V_, V_i).
-v_(Agr, Tns, V_, V_i) -->
-  vopt(Agr, Tns, np, V, Vi),
-  dp(_, DP, DPi),
-  vv(v_(V, DP), Vi@DPi, V_, V_i).
-v_(Agr, Tns, V_, V_i) -->
-  vopt(Agr, Tns, a, V, Vi),
-  ap(AP, APi),
-  vv(v_(V, AP), Vi@APi, V_, V_i).
+v_(Agr, Tns, Pred@E, V_, E:LF) --> event(E),
+  vopt(Agr, Tns, nil, V, Pred),
+  vv(v_(V), E, V_, LF).
+
+v_(Agr, Tns, Pred@E@X, V_, E:[LF1 | LF2]) --> event(E),
+  vopt(Agr, Tns, np, V, Pred),
+  dp(_, DP, X:LF1),
+  vv(v_(V, DP), E, V_, LF2).
+
+%v_(Agr, Tns, V_, V_i) --> event(E),
+%  vopt(Agr, Tns, a, V, Pred),
+%  ap(AP, APi),
+%  vv(v_(V, AP), Vi@APi, V_, V_i).
 
 % Relative clause with object gap.
 v_(Agr, Tns, VV, VVi) -->
@@ -392,7 +413,7 @@ vclf(V, DP, PP, x^PP@(V@DP@x)).
 %
 % Verb adjuncts.  Adjoins prepositional phrases to verb bars.
 
-vv(V_, V_i, V_, V_i) --> [].
+vv(V_, _, V_, []) --> [].
 vv(V_, V_i, VV, VVi) -->
   pp(PP, PPi),
   vv(v_(V_, PP), x^PPi@(V_i@x), VV, VVi).
@@ -407,34 +428,37 @@ vv(V_, V_i, VV, VVi) -->
 %
 % Determiner phrases.
 
-dp(Agr, dp(D_), D_i) --> d_(Agr, D_, D_i).
+dp(Agr, dp(D_), LF) --> d_(Agr, D_, LF).
 
 
 %% d_(+Agr, -T, -LF)
 %
 % Determiner bars.
 
-d_(Agr, d_(np(n_(PR))), PRi) --> pr(Agr, PR, PRi).
-d_(Agr, d_(D, NP), Di@NPi) --> d(Agr, D, Di), np(Agr, NP, NPi).
+d_(Agr, d_(np(n_(PR))), X:[]) --> pr(Agr, PR, X).
+d_(Agr, d_(D, NP), LF) --> d(Agr, D, _), np(Agr, NP, LF).
 
 
 %% np(+Agr, -T, -LF)
 %
 % Noun phrases.
 
-np(Agr, np(N_), N_i) --> n_(Agr, N_, N_i).
+np(Agr, np(N_), LF) --> n_(Agr, N_, LF).
 
 
 %% n_(+Agr, -T, -LF)
 %
 % Noun bars.
 
-n_(Agr, N_, N_i) --> n(Agr, N, Ni), nn(Agr, n_(N), Ni, N_, N_i).
-n_(Agr, N_, N_i) -->
-  ap(AP, APi),
-  n(Agr, N, Ni),
-  { and(Ni, APi, NA) },
-  nn(Agr, n_(AP, N), NA, N_, N_i).
+n_(Agr, N_, X:[Pred@X | LF]) --> entity(X),
+  n(Agr, N, Pred),
+  nn(Agr, n_(N), X, N_, LF).
+
+%n_(Agr, N_, N_i) -->
+%  ap(AP, APi),
+%  n(Agr, N, Ni),
+%  { and(Ni, APi, NA) },
+%  nn(Agr, n_(AP, N), NA, N_, N_i).
 
 
 %% nn(+Agr, +N_, +N_i, -T, -LF)
@@ -442,7 +466,7 @@ n_(Agr, N_, N_i) -->
 % Noun adjuncts.  Adjoins prepositional phrases and relative clauses to noun
 % bars.
 
-nn(_, N_, N_i, N_, N_i) --> [].
+nn(_, N_, _, N_, []) --> [].
 nn(_, N_, N_i, NN, NNi) -->
   pp(PP, PPi),
   { and(N_i, PPi, And) },
@@ -518,10 +542,10 @@ aspect(perf).
 %
 % Verb subcategorization frames.
 
-v_scf(_, Fs, aux,   _)         :- member(aux, Fs).
-v_scf(V, Fs, nil,   y^V@y)     :- member(nil, Fs).
-v_scf(V, Fs, np,    x^y^V@y@x) :- member(np, Fs).
-v_scf(V, Fs, np/X,  x^y^V@y@x) :- member(np/X, Fs).
+v_scf(V, Fs, aux,   z^x^V@z@x)     :- member(aux, Fs).
+v_scf(V, Fs, nil,   z^x^V@z@x)     :- member(nil, Fs).
+v_scf(V, Fs, np,    z^y^x^V@z@x@y) :- member(np, Fs).
+v_scf(V, Fs, np/X,  z^y^x^V@z@x@y) :- member(np/X, Fs).
 
 
 %% Auxiliary verbs.
@@ -532,11 +556,11 @@ v_scf(V, Fs, np/X,  x^y^V@y@x) :- member(np/X, Fs).
 % We share the paradigm descriptions of `be' and `have' with the verb lexical
 % predicate, and additionally define modal auxiliaries.
 
-aux(Agr, Tns, prog, X, _) --> v(Agr, Tns, prog, aux, v(X), _).
-aux(Agr, Tns, perf, X, _) --> v(Agr, Tns, perf, aux, v(X), _).
-aux(Agr, Tns, dsup, X, _) --> v(Agr, Tns, dsup, aux, v(X), _).
-aux(_/_, pres, mod, X, _) --> [X], {modal(X, _)}.
-aux(_/_, pret, mod, X, _) --> [X], {modal(_, X)}.
+aux(Agr, Tns, prog, X, LF) --> v(Agr, Tns, prog, aux, v(X), LF).
+aux(Agr, Tns, perf, X, LF) --> v(Agr, Tns, perf, aux, v(X), LF).
+aux(Agr, Tns, dsup, X, LF) --> v(Agr, Tns, dsup, aux, v(X), LF).
+aux(_/_, pres, mod, X, LF) --> [X], {modal(X, _), v_scf(X, [aux], aux, LF)}.
+aux(_/_, pret, mod, X, LF) --> [X], {modal(_, X), v_scf(X, [aux], aux, LF)}.
 
   modal(can, could).
   modal(may, might).
