@@ -235,25 +235,32 @@ nrel(X, Agr, Hum, Depth, Wh, C) --> rel(X, Agr, Hum, Depth, Wh, C).
 
 %% Inflectional phrase.
 %
-% ip(-T, -LF)                     Null or DP complementizer.
-% ip(+Agr, ?Tns, ?Gov, -T, -LF)   Verb complementizer.
+% ip(-T, -LF)                     IP with null or DP complementizer.
+% ip(+Agr, ?Tns, ?Gov, -T, -LF)   IP with verb complementizer.
 
-ip(ip(DP, I_), [Tns@E, Vld@X, LF2, LF1]) -->
+ip(ip(DP, I_), [Tld@E, Vld@X, LF2, LF1]) -->
   dpt(Agr, sbj, DP, X:LF1),
-  i_(Agr, Tns, _, Vld, I_, E:LF2),
+  i_(Agr, Tns, _, Tld, Vld, I_, E:LF2),
   { finite(Tns) }.
 
-ip(Agr, Tns, Gov, ip(DP, I_), [Tns@E, Vld@X, LF2, LF1]) -->
+ip(Agr, Tns, Gov, ip(DP, I_), [Tld@E, Vld@X, LF2, LF1]) -->
   dp(Agr, sbj, DP, X:LF1),
-  i_(_, Tns, Gov, Vld, I_, E:LF2).
+  i_(_, Tns, Gov, Tld, Vld, I_, E:LF2).
 
-i_(Agr, Tns, Gov, Vld, i_(i(Tns), II), LF) --> ii(Agr, Tns, Gov, Vld, II, LF).
 
-ii(Agr, Tns, mod,  Vld, VP, LF) --> mp(Agr, Tns, Vld, VP, LF).
-ii(Agr, Tns, perf, Vld, VP, LF) --> perfp(Agr, Tns, Vld, VP, LF).
-ii(Agr, Tns, prog, Vld, VP, LF) --> progp(Agr, Tns, Vld, VP, LF).
-ii(Agr, Tns, dsup, Vld, VP, LF) --> dsup(Agr, Tns, Vld, VP, LF).
-ii(Agr, Tns, simp, Vld, VP, LF) --> vp(Agr, Tns, Vld, VP, LF).
+%% i_(?Agr, ?Tns, ?Gov, -Tld, -Vld, -T, -LF)
+%
+% Inflectional bar.  Returns the tense and verb lambda abstractions to enable
+% application by the IP.
+
+i_(Agr, Tns, Gov, Tld, Vld, i_(i(Tns), II), LF) -->
+  ii(Agr, Tns, Gov, Tld, Vld, II, LF).
+
+ii(Agr, Tns, mod,  Tns, Vld, VP, LF) --> mp(Agr, Tns, Vld, VP, LF).
+ii(Agr, Tns, perf, Tns, Vld, VP, LF) --> perfp(Agr, Tns, Vld, VP, LF).
+ii(Agr, Tns, prog, Tns, Vld, VP, LF) --> progp(Agr, Tns, Vld, VP, LF).
+ii(Agr, Tns, dsup, Tld, Vld, VP, LF) --> dsup(Agr, Tns, Tld, Vld, VP, LF).
+ii(Agr, Tns, simp, Tns, Vld, VP, LF) --> vp(Agr, Tns, Vld, VP, LF).
 
 
 %% Modality.
@@ -306,14 +313,14 @@ progp(_, Tns, Vld, progp(prog(t/N), VP), E:[Lbd@E@E_ | LF]) --> event(E),
 
 %% Do-support.
 %
-% dsup(+Agr, -Tns, -Vld, -T, -LF)   Fill `do' into Tns.
+% dsup(+Agr, -Tns, -Tld, -Vld, -T, -LF)   Fill `do' into Tns.
 
-dsup(Agr, Do, Vld, VP, LF) -->
-  aux(Agr, _, dsup, Do, _),
+dsup(Agr, Do, Tns, Vld, VP, LF) -->
+  aux(Agr, Tns, dsup, Do, _),
   vp(_, infin, Vld, VP, LF).
 
-dsup(_, t/N, Vld, VP, LF) -->
-  cstack_pop(aux, _, N, _/dsup),
+dsup(_, t/N, Tns, Vld, VP, LF) -->
+  cstack_pop(aux, _, N, Tns/dsup),
   vp(_, infin, Vld, VP, LF).
 
 
