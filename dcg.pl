@@ -400,9 +400,7 @@ dpt(_, Role, dp(t/N), X:[]) --> cstack_pop(Role, X, N, _).
 %
 % Determiner bar.
 
-d_(Agr, Role, d_(np(n_(N))), X:[]) -->
-  pn(Agr, Case, N, X),
-  {case_role(Case, Role)}.
+d_(Agr, Role, d_(np(n_(N))), X:[]) --> pn(Agr, Case, N, X), {role(Case, Role)}.
 d_(Agr, _, d_(np(n_(N))), X:[]) --> pr(Agr, N, X).
 d_(Agr, _, d_(D, NP), LF) --> d(Agr, D, _), np(Agr, NP, LF).
 
@@ -632,13 +630,16 @@ p(P) --> [P1, P2], {prep(P1, P2), atom_concat(P1, P2, P)}.
 %  Pro-forms lexicon.
 %
 
-%% case_role(?Case, ?Role)
+%% role(?Case, ?Role)
 %
 % A noun inflected as Case can fill Role.
 
-case_role(nom, sbj).
-case_role(obl, obj).
-case_role(gpn, _).
+role(nom, sbj).
+role(obl, obj).
+role(obl, pp).
+role(gpn, sbj).
+role(gpn, obj).
+role(refl, obj).
 
 
 % pn(?Agr, ?Case, -T, -LF)
