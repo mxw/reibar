@@ -324,12 +324,12 @@ dsup(_, t/N, Vld, VP, LF) -->
 %  Verb grammar.
 %
 
-%% vopt(-Agr, -Tns, -Sub, -V, -LF)
+%% vt(-Agr, -Tns, -Sub, -V, -LF)
 %
 % Parse a verb or pop one off the complementizer stack.
 
-vopt(Agr, Tns, Sub, V, LF) --> v(Agr, Tns, Sub, V, LF).
-vopt(_, Tns, Sub, v(t/N), LF) --> cstack_pop(verb, LF, N, Tns/Sub).
+vt(Agr, Tns, Sub, V, LF) --> v(Agr, Tns, Sub, V, LF).
+vt(_, Tns, Sub, v(t/N), LF) --> cstack_pop(verb, LF, N, Tns/Sub).
 
 
 %% vp(+Agr, -Tns, -Vld, -T, -LF)
@@ -351,16 +351,16 @@ vp(Agr, Tns, Lbd@E@X, vp(v_(v(N/v), vp(Spec, V_))), E:[LF1, LF2]) --> event(E),
 % Verb bars for the subcategories `nil', `np', and `a'.
 
 v_(Agr, Tns, Lbd@E, V_, E:LF) --> event(E),
-  vopt(Agr, Tns, nil, V, Lbd),
+  vt(Agr, Tns, nil, V, Lbd),
   vv(v_(V), E, V_, LF).
 
 v_(Agr, Tns, Lbd@E@X, V_, E:[LF1 | LF2]) --> event(E),
-  vopt(Agr, Tns, np, V, Lbd),
+  vt(Agr, Tns, np, V, Lbd),
   dpt(_, obj, DP, X:LF1),
   vv(v_(V, DP), E, V_, LF2).
 
 %v_(Agr, Tns, V_, V_i) --> event(E),
-%  vopt(Agr, Tns, a, V, Lbd),
+%  vt(Agr, Tns, a, V, Lbd),
 %  ap(AP, APi),
 %  vv(v_(V, AP), Vi@APi, V_, V_i).
 
