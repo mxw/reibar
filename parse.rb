@@ -1,18 +1,11 @@
 #
-# tree.rb - Generate a parse tree for a sentence.
+# parse.rb - Parse a sentence, outputting a syntax tree and logical form.
 #
-# Based very loosely on an anonymous Piazza post for CS 187, 2013.
-#
-
-require 'set'
-
-# Identifying prefix for syntax tree root.
-PREFIX = 'cp'
 
 # Output directory and files.
 OUTDIR = 'out'
-TEXFILE = 'trees.tex'
-PDFFILE = 'trees.pdf'
+SYNFILE = 'trees'
+SEMFILE = 'lfs'
 
 
 ###############################################################################
@@ -161,19 +154,23 @@ sentence = gets.downcase.gsub(/[.']/, ' ').strip.split.join(', ')
 
 # Load and query.
 loadf = "use_module(#{File.basename(prolog, '.pl')})"
-query = "sentence([#{sentence}], S, _), write_ln(S), fail."
+query = "sentence([#{sentence}], S, I), write_ln(S), write_ln(I), fail."
 swipl = ['swipl', '-g', loadf, '-t', query]
 
+
 # Spawn a SWI-prolog.
-trees = IO.popen(swipl, :err => [:child, :out]) do |io|
-  # Pull out valid syntax trees.
-  trees = io.readlines.select { |s| s.start_with? (PREFIX + '(') }
+trees, lfs = IO.popen(swipl, :err => [:child, :out]) do |io|
+  lines = io.readlines
+
+  # Pull out trees and interpretations.
+  trees = lines.select { |s| s.start_with? ('cp(') }
+  lfs   = lines.select { |s| s.start_with? ('[') }
 
   # Print query result.
   abort 'Sentence was rejected.' if trees.empty?
-  puts trees
+  puts trees, lfs
 
-  trees.map do |s|
+  trees.map! do |s|
     # Simplify DP's.
     s.gsub!(/dp\(d_\(np\(n_\(n\(([\w\/. ]+)\)\)\)\)\)/, '*dp(\1)')
     s.gsub!(/dp\(d_\(d\(([\w\/. ]+)\),\s*np\(n_\(n\(([\w\/. ]+)\)\)\)\)\)/, '*dp(\1 \2)')
@@ -182,7 +179,7 @@ trees = IO.popen(swipl, :err => [:child, :out]) do |io|
     re = /[\w*]+\(|\)|[\w\/. ]+/
 
     # X-bar-ificate the tree output.
-    tree = s.scan(re).inject(XBarNode.new('')) do |node, token|
+    s.scan(re).inject(XBarNode.new('')) do |node, token|
       if token == ')'
         node.parent
       else
@@ -191,9 +188,16 @@ trees = IO.popen(swipl, :err => [:child, :out]) do |io|
         if child.node? then child else node end
       end
     end.children.first
-
-    tree
   end
+
+  lfs.map! do |s|
+    # TeX-ify all the things!
+    s.strip[1...-1].scan(/\w+\([^()]+\)/).map do |s|
+      s.gsub(/\/(\d+)/, '_{\1}').gsub(/(\w+)([(),])/, '\text{\1}\2')
+    end
+  end
+
+  [trees, lfs]
 end
 
 
@@ -202,8 +206,10 @@ end
 #  Compile.
 #
 
+Dir.chdir(OUTDIR)
+
 # LaTeX header/footer.
-PREAMBLE = %w{
+syn_preamble = %w{
   \documentclass[tikz,border=1cm]{standalone}
   \usepackage[T1]{fontenc}
   \usepackage[english]{babel}
@@ -211,26 +217,37 @@ PREAMBLE = %w{
   \begin{document}
 } << ''
 
-EPILOGUE = [''] + %w{
+sem_preamble = %w{
+  \documentclass[multi,border=1cm]{standalone}
+  \usepackage{amsmath}
+  \usepackage[T1]{fontenc}
+  \usepackage[english]{babel}
+  \standaloneenv{logform}
+  \begin{document}
+} << ''
+
+epilogue = [''] + %w{
   \end{document}
 }
 
-# Wrap trees.
+# Format content.
 trees.map! do |tree|
-  [ '\begin{tikzpicture}',
-    tree,
-    '\end{tikzpicture}',
-  ]
+  [ '\begin{tikzpicture}', tree, '\end{tikzpicture}' ]
+end
+lfs.map! do |lf|
+  [ '\begin{logform}', '$' + lf.join(' \land ') + '$', '\end{logform}' ]
 end
 
-# Change to out directory.
-Dir.chdir(OUTDIR)
-
-# Write to LaTeX file.
-File.open(TEXFILE, 'w') do |f|
-  f.puts(PREAMBLE + trees + EPILOGUE)
+# Write to LaTeX files.
+File.open(SYNFILE + '.tex', 'w') do |f|
+  f.puts(syn_preamble + trees + epilogue)
+end
+File.open(SEMFILE + '.tex', 'w') do |f|
+  f.puts(sem_preamble + lfs + epilogue)
 end
 
-# Compile and open the PDF.
-`pdflatex #{TEXFILE}`
-`open #{PDFFILE}`
+# Compile and open the PDFs.
+`pdflatex #{SYNFILE + '.tex'}`
+`pdflatex #{SEMFILE + '.tex'}`
+`open #{SYNFILE + '.pdf'}`
+`open #{SEMFILE + '.pdf'}`
