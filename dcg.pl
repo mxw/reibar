@@ -267,8 +267,8 @@ ii(Agr, Tns, simp, Vld, VP, LF) --> vp(Agr, Tns, Vld, VP, LF).
 
 %% Modality.
 %
-% mp(+Agr, -Tns, -T, -LF)   Modal phrase.
-% mc(-T, -LF)               Modal complement.
+% mp(+Agr, -Tns, -Vld, -T, -LF)   Modal phrase.
+% mc(-Vld, -T, -LF)               Modal complement.
 
 mp(Agr, Tns, Vld, mp(m(Aux), MC), E:[Lbd@E@E_ | LF]) --> event(E),
   aux(Agr, Tns, mod, Aux, Lbd),
@@ -285,8 +285,8 @@ mc(Vld, VP, LF) --> vp(_, infin, Vld, VP, LF).
 
 %% Perfective aspect.
 %
-% perfp(+Agr, -Tns, -T, -LF)  Perfective phrase.
-% perfc(-T, -LF)              Perfective complement.
+% perfp(+Agr, -Tns, -Vld, -T, -LF)  Perfective phrase.
+% perfc(-T, -Vld, -LF)              Perfective complement.
 
 perfp(Agr, Tns, Vld, perfp(perf(Aux), PerfC), E:[Lbd@E@E_ | LF]) --> event(E),
   aux(Agr, Tns, perf, Aux, Lbd),
@@ -302,7 +302,7 @@ perfc(Vld, VP, LF) --> vp(_, pastp, Vld, VP, LF).
 
 %% Progressive aspect.
 %
-% progp(+Agr, -Tns, -T, -LF)  Progressive phrase.
+% progp(+Agr, -Tns, -Vld, -T, -LF)  Progressive phrase.
 
 progp(Agr, Tns, Vld, progp(prog(Aux), VP), E:[Lbd@E@E_ | LF]) --> event(E),
   aux(Agr, Tns, prog, Aux, Lbd),
@@ -315,7 +315,7 @@ progp(_, Tns, Vld, progp(prog(t/N), VP), E:[Lbd@E@E_ | LF]) --> event(E),
 
 %% Do-support.
 %
-% dsup(+Agr, -Tns, -T, -LF)   Fill `do' into Tns.
+% dsup(+Agr, -Tns, -Vld, -T, -LF)   Fill `do' into Tns.
 
 dsup(Agr, Do, Vld, VP, LF) -->
   aux(Agr, _, dsup, Do, _),
@@ -339,7 +339,7 @@ vopt(Agr, Tns, Sub, V, LF) --> v(Agr, Tns, Sub, V, LF).
 vopt(_, Tns, Sub, v(t/N), LF) --> cstack_pop(verb, LF, N, Tns/Sub).
 
 
-%% vp(+Agr, -Tns, -T, -LF)
+%% vp(+Agr, -Tns, -Vld, -T, -LF)
 %
 % Verb phrases.  We delegate verb subcategories with one or two theta roles to
 % v_/4 and those with three theta roles to vc/5.
@@ -353,7 +353,7 @@ vp(Agr, Tns, vp(v_(v(N/v), vp(Spec, V_))), V_i) -->
   vv(v_(v(V/N), Comp), VCi, V_, V_i).
 
 
-%% v_(+Agr, -Tns, -T, -LF)
+%% v_(+Agr, -Tns, -Vld, -T, -LF)
 %
 % Verb bars for the subcategories `nil', `np', and `a'.
 
