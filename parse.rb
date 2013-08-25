@@ -151,7 +151,7 @@ end
 
 # Shift the Prolog file.
 prolog = ARGV.shift
-abort 'Usage: tree.rb grammar-file' if prolog.nil?
+abort 'Usage: parse.rb grammar-file' if prolog.nil?
 
 # Get input from user.
 print 'Sentence: '

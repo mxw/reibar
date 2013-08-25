@@ -144,13 +144,16 @@ s(CP, LF) -->
 % sentence-local complementizer stack---this is used to pass them to their
 % usual position in the sentence.
 
+% Declarative sentence.
 cp(cp(C_), LF) --> c_(C_, LF).
 
+% Question with wh-specifier.
 cp(cp(Wh, C_), LF) --> entity(X),
   rel(X, _, _, Depth, Wh, _),
   c_(C_, LF),
   { cstack_depth(Depth) }.
 
+% Null complementizer.
 c_(c_(IP), LF) --> ip(IP, LF).
 
 % Auxiliary complementizer.
@@ -720,12 +723,12 @@ whdet(Wh) --> [Wh], {whdet(Wh)}.
   whdet(what).
   whdet(which).
 
-% whadv(?Wh, ?Fn, ?Rel)
+% whadv(?Wh, ?Qfn, ?Rel)
 %
 % Wh- adverbs.  Features include wh function (time, location, etc.) and
 % relativizer function (bound/free).
 
-whadv(Wh, Fn, Rel) --> [Wh], {whadv(Wh, Fn, Rs), member(Rel, Rs)}.
+whadv(Wh, Qfn, Rel) --> [Wh], {whadv(Wh, Qfn, Rs), member(Rel, Rs)}.
 
   whadv(when,   time,   [bound, free]).
   whadv(where,  loc,    [bound, free]).
