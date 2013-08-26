@@ -5,7 +5,7 @@ noun(box, boxes).
 noun(boy, boys).
 noun(cake, cakes).
 noun(circle, circles).
-noun(child, children).
+noun(child, children, '\'s', '\'s').
 noun(cookie, cookies).
 noun(friend, friends).
 noun(girl, girls).

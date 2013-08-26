@@ -1,4 +1,4 @@
-pr([avatar]).
-pr([cambridge]).
-pr([los, angeles]).
-pr([max]).
+pr(avatar).
+pr(cambridge).
+pr('los angeles').
+pr(max).

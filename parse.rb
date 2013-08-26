@@ -155,7 +155,8 @@ abort 'Usage: parse.rb grammar-file' if prolog.nil?
 
 # Get input from user.
 print 'Sentence: '
-sentence = gets.downcase.gsub(/[.']/, ' ').strip.split.join(', ')
+words = gets.downcase.strip.split(/('s)\s+|(')\s+|\s+/)
+sentence = words.map{|w| "'#{w.gsub("'", "\\\\'")}'"}.join(', ')
 
 # Load and query.
 loadf = "use_module(#{File.basename(prolog, '.pl')})"
@@ -181,7 +182,7 @@ trees, lfs = IO.popen(swipl, :err => [:child, :out]) do |io|
     s.gsub!(/dp\(d_\(d\(([\w\/. ]+)\),\s*np\(n_\(n\(([\w\/. ]+)\)\)\)\)\)/, '*dp(\1 \2)')
 
     # Regexp for tokenizing the tree.
-    re = /[\w*]+\(|\)|[\w\/.\[\] ]+/
+    re = /[\w*]+\(|\)|[\w\/.'\[\] ]+/
 
     # X-bar-ificate the tree output.
     s.scan(re).inject(XBarNode.new('')) do |node, token|

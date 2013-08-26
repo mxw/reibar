@@ -403,48 +403,85 @@ vv(V_, E, VV, [Lbd@E, LF1 | LF2]) -->
 %
 % dp(?Agr, ?Role, -T, -LF)    DP required.
 % dpt(?Agr, ?Role, -T, -LF)   Either DP or trace.
+%
+% The logical form returned is colon-prefixed with an entity.
 
-dp(Agr, Role, dp(D_), LF) --> d_(Agr, Role, D_, LF).
+dp(Agr, Role, DP, Y:[LF1 | LF2]) -->
+  d_(Agr_, Role, Pos, D_, X:LF1),
+  dps(Agr|Agr_, Pos, X/dp(D_), DP, Y:LF2).
 
 dpt(Agr, Role, DP, LF) --> dp(Agr, Role, DP, LF).
 dpt(Agr, Role, dp(t/N), X:[]) --> cstack_pop(Role, X, N, Agr).
 
 
-%% d_(?Agr, ?Role, -T, -LF)
+%% dps(?Agr|?Agr_, +Pos, +X/+Spec, -T, -LF)
+%
+% Determiner phrase possession chain.  Takes a DP possessor and inserts it as
+% the specifier of a parent DP.
+%
+% Any external agreement constraints are bound to the first Agr term.  These
+% constraints are enforced at the end of the chain, on the final possessee,
+% which bubbles up an unbound Agr_ in the second term, leaving all possessors'
+% agreement unbound.
+
+% No possession.
+dps(Agr|Agr, _, X/DP, DP, X:[]) --> [].
+
+% Implied possessee.
+dps(_/3|_, Pos, X/Spec, DP, Y:[Of]) --> entity(Y),
+  pos(Pos, X/Spec, Y/np([]), DP, Of).
+
+% Explicit possessee.
+dps(Agr|_, Pos, X/Spec, DP, Z:[Of, LF1 | LF2]) -->
+  pos(Pos, X/Spec, Y/NP, DP_, Of),
+  np(Agr_, Pos_, NP, Y:LF1),
+  dps(Agr|Agr_, Pos_, Y/DP_, DP, Z:LF2).
+
+
+%% pos(+Pos, +X/Spec, +Y/NP, -T, -LF)
+%
+% Possessive marker.  Also does the work of generating the trees and logical
+% forms for the possession relationship.
+
+pos(Pos, X/Spec, Y/NP, dp(Spec, d_(d(Pos), NP)), Lbd@X@Y) --> [Pos],
+  { p(of, abstr, _, Lbd, _, _) }.
+
+
+%% d_(?Agr, ?Role, -Pos, -T, -LF)
 %
 % Determiner bar.
 
-d_(Agr, Role, d_(np(n_(N))), X:[]) --> pn(Agr, Case, N, X), {role(Case, Role)}.
-d_(Agr, _, d_(np(n_(N))), X:[]) --> pr(Agr, N, X).
-d_(Agr, _, d_(D, NP), LF) --> d(Agr, D, _), np(Agr, NP, LF).
+d_(Agr, Role, [], d_(np(n_(N))), X:[]) --> pn(Agr, Case, N, X), {role(Case, Role)}.
+d_(Agr, _, Pos, d_(np(n_(N))), X:[]) --> pr(Agr, Pos, N, X).
+d_(Agr, _, Pos, d_(D, NP), LF) --> d(Agr, D, _), np(Agr, Pos, NP, LF).
 
 
-%% np(?Agr, -T, -LF)
+%% np(?Agr, -Pos, -T, -LF)
 %
 % Noun phrase.
 
-np(Agr, np(N_), LF) --> n_(Agr, N_, LF).
+np(Agr, Pos, np(N_), LF) --> n_(Agr, Pos, N_, LF).
 
 
-%% n_(?Agr, -T, -LF)
+%% n_(?Agr, -Pos, -T, -LF)
 %
 % Noun bar.
 
-n_(Agr, N_, X:[Lbd@X | LF]) --> entity(X),
-  n(Agr, N, Lbd),
-  nn(Agr, n_(N), X, N_, LF).
+n_(Agr, Pos, N_, X:[Lbd@X | LF]) --> entity(X),
+  n(Agr, S, N, Lbd),
+  nn(Agr, X/n_(N), S:Pos, N_, LF).
 
 
-%% nn(?Agr, +N_, +X, -T, -LF)
+%% nn(?Agr, +X/+N_, +S:-Pos, -T, -LF)
 %
 % Noun adjunct.  Adjoins prepositional phrases and relative clauses to noun
 % bars.
 
-nn(_, N_, _, N_, []) --> [].
-nn(_, N_, X, NN, [Lbd@X, LF1 | LF2]) -->
+nn(_, _/N_, Pos:Pos, N_, []) --> [].
+nn(_, X/N_, _:'\'s', NN, [Lbd@X, LF1 | LF2]) -->
   pp(_, abstr, Lbd, PP, LF1),
-  nn(_, n_(N_, PP), X, NN, LF2).
-nn(Agr, N_, X, n_(N_, CP), LF) --> rp(Agr, _, X, CP, LF).
+  nn(_, X/n_(N_, PP), _, NN, LF2).
+nn(Agr, X/N_, _:'\'s', n_(N_, CP), LF) --> rp(Agr, _, X, CP, LF).
 
 
 %------------------------------------------------------------------------------
@@ -480,25 +517,33 @@ ap(ap(a_(A)), Ai) --> a(A, Ai).
 %  Exported lexicons.
 %
 
+:- discontiguous(noun/2).
+:- discontiguous(noun/4).
 :- ensure_loaded('lex/pr.pl').
 :- ensure_loaded('lex/noun.pl').
 :- ensure_loaded('lex/adj.pl').
 :- ensure_loaded('lex/verb.pl').
 
 
-%% pr(+Agr, -T, -Lbd)
+%% pr(+Agr, -Pos, -T, -Lbd)
 %
-% Proper nouns.
+% Proper nouns.  Features include the appropriate possessive marker.
 
-pr(sg/3, n(PR), PR) --> {pr(X), atomic_list_concat(X, ' ', PR)}, X.
+pr(sg/3, Pos, n(PR), PR) --> [PR], {pr(PR, Pos)}.
+
+% Lexicon shorthand.
+pr(PR, '\'s') :- pr(PR).
 
 
-%% n(+Agr, -T, -Lbd)
+%% n(+Agr, -Pos, -T, -Lbd)
 %
-% Common nouns.
+% Proper nouns.  Features include the appropriate possessive marker.
 
-n(sg/3, n(Sg), x^Sg@x) --> [Sg], {noun(Sg, _Pl)}.
-n(pl/3, n(Pl), x^Sg@x) --> [Pl], {noun(Sg, Pl)}.
+n(sg/3, Pos, n(Sg), x^Sg@x) --> [Sg], {noun(Sg, _, Pos, _)}.
+n(pl/3, Pos, n(Pl), x^Pl@x) --> [Pl], {noun(_, Pl, _, Pos)}.
+
+% Lexicon shorthand.
+noun(Sg, Pl, '\'s', '\'') :- noun(Sg, Pl).
 
 
 %% a(-T, -Lbd)
