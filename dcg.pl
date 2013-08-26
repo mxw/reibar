@@ -479,7 +479,7 @@ n_(Agr, Pos, N_, X:[Lbd@X | LF]) --> entity(X),
 
 nn(_, _/N_, Pos:Pos, N_, []) --> [].
 nn(_, X/N_, _:'\'s', NN, [Lbd@X, LF1 | LF2]) -->
-  pp(_, abstr, Lbd, PP, LF1),
+  ppx(_, abstr, Lbd, PP, LF1),
   nn(_, X/n_(N_, PP), _, NN, LF2).
 nn(Agr, X/N_, _:'\'s', n_(N_, CP), LF) --> rp(Agr, _, X, CP, LF).
 
@@ -492,6 +492,7 @@ nn(Agr, X/N_, _:'\'s', n_(N_, CP), LF) --> rp(Agr, _, X, CP, LF).
 %% Prepositional phrase.
 %
 % pp(?Prep, +Reif, -Lbd, -T, -LF)     PP required.
+% ppx(?Prep, +Reif, -Lbd, -T, -LF)    PP with required DP.
 % ppt(?Prep, +Reif, -Lbd, -T, -LF)    Either PP or trace.
 
 pp(Prep, abstr, Lbd@X, pp(P, DP), LF) -->
@@ -500,6 +501,13 @@ pp(Prep, abstr, Lbd@X, pp(P, DP), LF) -->
 pp(Prep, reify, Lbd@E@X, pp(P, DP), E:LF) --> event(E),
   p(Prep, reify, P, Lbd),
   dpt(_, obj, DP, X:LF).
+
+ppx(Prep, abstr, Lbd@X, pp(P, DP), LF) -->
+  p(Prep, abstr, P, Lbd),
+  dp(_, obj, DP, X:LF).
+ppx(Prep, reify, Lbd@E@X, pp(P, DP), E:LF) --> event(E),
+  p(Prep, reify, P, Lbd),
+  dp(_, obj, DP, X:LF).
 
 ppt(Prep, Reif, Lbd, PP, LF) --> pp(Prep, Reif, Lbd, PP, LF).
 ppt(Prep, _, Lbd@X, pp(t/N), []) --> cstack_pop(pp, X:Lbd, N, Prep).
