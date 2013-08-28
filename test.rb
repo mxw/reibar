@@ -17,7 +17,7 @@ LOADF = "use_module(#{File.basename(prolog, '.pl')})"
 #  Testing DSL.
 #
 
-def sentence(s, &blk)
+def sentence(s, success, &blk)
   fiber = Fiber.new &blk
 
   words = s.downcase.strip.gsub('.', '').split(/('s)\s+|(')\s+|\s+/)
@@ -54,10 +54,13 @@ def sentence(s, &blk)
     return
   end
 
-  puts "PASSED: ".green + s
+  puts "#{success}: ".green + s
 end
 
 def parse(syn, sem); Fiber.yield(syn, sem); end
+
+def accept(s, &blk); sentence s, "ACCEPTED", &blk; end
+def reject(s); sentence s, "REJECTED" do; end; end
 
 
 ###############################################################################
@@ -65,17 +68,49 @@ def parse(syn, sem); Fiber.yield(syn, sem); end
 #  Tests.
 #
 
-sentence 'Max leaves.' do
+reject 'Max.'
+
+accept 'Max leaves.' do
   parse "cp(c_(ip(dp(d_(np(n_(n(max))))),i_(i(pres),vp(v_(v(leaves)))))))",
         "[pres(e/1),leave(e/1,max)]"
 end
 
-sentence 'Max left.' do
+reject 'Max leave.'
+
+accept 'Max left.' do
   parse "cp(c_(ip(dp(d_(np(n_(n(max))))),i_(i(pret),vp(v_(v(left)))))))",
         "[pret(e/1),leave(e/1,max)]"
 end
 
-sentence 'The boy leaves.' do
+reject 'The boy.'
+
+reject 'The goes.'
+
+accept 'The boy leaves.' do
   parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boy))))),i_(i(pres),vp(v_(v(leaves)))))))",
         "[pres(e/1),leave(e/1,x/1),boy(x/1)]"
+end
+
+reject 'The boy leave.'
+
+accept 'The boy left.' do
+  parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boy))))),i_(i(pret),vp(v_(v(left)))))))",
+        "[pret(e/1),leave(e/1,x/1),boy(x/1)]"
+end
+
+accept 'The boys leave.' do
+  parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boys))))),i_(i(pres),vp(v_(v(leave)))))))",
+        "[pres(e/1),leave(e/1,x/1),boys(x/1)]"
+end
+
+reject 'The boys leaves.'
+
+accept 'The boys left.' do
+  parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boys))))),i_(i(pret),vp(v_(v(left)))))))",
+        "[pret(e/1),leave(e/1,x/1),boys(x/1)]"
+end
+
+accept 'The boys meet the girl.' do
+  parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boys))))),i_(i(pres),vp(v_(v(meet),dp(d_(d(the),np(n_(n(girl)))))))))))",
+        "[pres(e/1),meet(e/1,x/1,x/2),girl(x/2),boys(x/1)]"
 end
