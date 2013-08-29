@@ -34,6 +34,19 @@ incr(Counter, N_) :-
   b_setval(Counter, N_).
 
 
+%% xp(?Cat, ?Head, ?Comp, ?XP)
+%
+% Produce a basic, unspecified, unadjoined XP tree.  Can be used in any mode
+% with one -.
+
+xp(Cat, Head, Comp, XP) :-
+  atom_concat(Cat, '_', Cat_),
+  atom_concat(Cat, p, CatP),
+  X  =.. [Cat, Head],
+  X_ =.. [Cat_, X, Comp],
+  XP =.. [CatP, X_].
+
+
 %------------------------------------------------------------------------------
 %
 %  Semantics.
@@ -271,13 +284,15 @@ ii(Agr, Tns, simp, Tns, Vld, VP, LF) --> vp(Agr, Tns, Vld, VP, LF).
 % mp(?Agr, ?Tns, -Vld, -T, -LF)   Modal phrase.
 % mc(-Vld, -T, -LF)               Modal complement.
 
-mp(Agr, Tns, Vld, mp(m(Aux), MC), E:[Lbd@E@E_ | LF]) --> event(E),
+mp(Agr, Tns, Vld, MP, E:[Lbd@E@E_ | LF]) --> event(E),
   aux(Agr, Tns, mod, Aux, Lbd),
-  mc(Vld, MC, E_:LF).
+  mc(Vld, MC, E_:LF),
+  { xp(m, Aux, MC, MP) }.
 
-mp(_, Tns, Vld, mp(m(t/N), MC), E:[Lbd@E@E_ | LF]) --> event(E),
+mp(_, Tns, Vld, MP, E:[Lbd@E@E_ | LF]) --> event(E),
   cstack_pop(aux, Lbd, N, Tns/mod),
-  mc(Vld, MC, E_:LF).
+  mc(Vld, MC, E_:LF),
+  { xp(m, t/N, MC, MP) }.
 
 mc(Vld, PerfP, LF) --> perfp(_, infin, Vld, PerfP, LF).
 mc(Vld, ProgP, LF) --> progp(_, infin, Vld, ProgP, LF).
@@ -289,13 +304,15 @@ mc(Vld, VP, LF) --> vp(_, infin, Vld, VP, LF).
 % perfp(?Agr, ?Tns, -Vld, -T, -LF)  Perfective phrase.
 % perfc(-Vld, -T, -LF)              Perfective complement.
 
-perfp(Agr, Tns, Vld, perfp(perf(Aux), PerfC), E:[Lbd@E@E_ | LF]) --> event(E),
+perfp(Agr, Tns, Vld, PerfP, E:[Lbd@E@E_ | LF]) --> event(E),
   aux(Agr, Tns, perf, Aux, Lbd),
-  perfc(Vld, PerfC, E_:LF).
+  perfc(Vld, PerfC, E_:LF),
+  { xp(perf, Aux, PerfC, PerfP) }.
 
-perfp(_, Tns, Vld, perfp(perf(t/N), PerfC), E:[Lbd@E@E_ | LF]) --> event(E),
+perfp(_, Tns, Vld, PerfP, E:[Lbd@E@E_ | LF]) --> event(E),
   cstack_pop(aux, Lbd, N, Tns/perf),
-  perfc(Vld, PerfC, E_:LF).
+  perfc(Vld, PerfC, E_:LF),
+  { xp(perf, t/N, PerfC, PerfP) }.
 
 perfc(Vld, ProgP, LF) --> progp(_, pastp, Vld, ProgP, LF).
 perfc(Vld, VP, LF) --> vp(_, pastp, Vld, VP, LF).
@@ -305,13 +322,15 @@ perfc(Vld, VP, LF) --> vp(_, pastp, Vld, VP, LF).
 %
 % progp(?Agr, ?Tns, -Vld, -T, -LF)  Progressive phrase.
 
-progp(Agr, Tns, Vld, progp(prog(Aux), VP), E:[Lbd@E@E_ | LF]) --> event(E),
+progp(Agr, Tns, Vld, ProgP, E:[Lbd@E@E_ | LF]) --> event(E),
   aux(Agr, Tns, prog, Aux, Lbd),
-  vp(_, presp, Vld, VP, E_:LF).
+  vp(_, presp, Vld, VP, E_:LF),
+  { xp(prog, Aux, VP, ProgP) }.
 
-progp(_, Tns, Vld, progp(prog(t/N), VP), E:[Lbd@E@E_ | LF]) --> event(E),
+progp(_, Tns, Vld, ProgP, E:[Lbd@E@E_ | LF]) --> event(E),
   cstack_pop(aux, Lbd, N, Tns/prog),
-  vp(_, presp, Vld, VP, E_:LF).
+  vp(_, presp, Vld, VP, E_:LF),
+  { xp(prog, t/N, VP, ProgP) }.
 
 
 %% Do-support.
