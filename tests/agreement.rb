@@ -2,41 +2,45 @@
 # agreement.rb - Test for basic agreement.
 #
 
-accept 'Max lives.' do
-  parse "cp(c_(ip(dp(d_(np(n_(n(max))))),i_(i(pres),vp(v_(v(lives)))))))",
-        "[pres(e/1),live(e/1,max)]"
+accept 'Max goes.' do
+  parse "cp(c_(ip(dp(d_(np(n_(n(max))))),i_(i(pres),vp(v_(v(goes)))))))",
+        "[pres(e/1),go(e/1,max)]"
 end
 
-accept 'Max lived.' do
-  parse "cp(c_(ip(dp(d_(np(n_(n(max))))),i_(i(pret),vp(v_(v(lived)))))))",
-        "[pret(e/1),live(e/1,max)]"
+accept 'Max went.' do
+  parse "cp(c_(ip(dp(d_(np(n_(n(max))))),i_(i(pret),vp(v_(v(went)))))))",
+        "[pret(e/1),go(e/1,max)]"
 end
 
-accept 'The boy lives.' do
-  parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boy))))),i_(i(pres),vp(v_(v(lives)))))))",
-        "[pres(e/1),live(e/1,x/1),boy(x/1)]"
+accept 'The boy goes.' do
+  parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boy))))),i_(i(pres),vp(v_(v(goes)))))))",
+        "[pres(e/1),go(e/1,x/1),boy(x/1)]"
 end
 
-accept 'The boy lived.' do
-  parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boy))))),i_(i(pret),vp(v_(v(lived)))))))",
-        "[pret(e/1),live(e/1,x/1),boy(x/1)]"
+accept 'The boy went.' do
+  parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boy))))),i_(i(pret),vp(v_(v(went)))))))",
+        "[pret(e/1),go(e/1,x/1),boy(x/1)]"
 end
 
-accept 'The boys live.' do
-  parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boys))))),i_(i(pres),vp(v_(v(live)))))))",
-        "[pres(e/1),live(e/1,x/1),boys(x/1)]"
+accept 'The boys go.' do
+  parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boys))))),i_(i(pres),vp(v_(v(go)))))))",
+        "[pres(e/1),go(e/1,x/1),boys(x/1)]"
 end
 
-accept 'The boys lived.' do
-  parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boys))))),i_(i(pret),vp(v_(v(lived)))))))",
-        "[pret(e/1),live(e/1,x/1),boys(x/1)]"
+accept 'The boys went.' do
+  parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boys))))),i_(i(pret),vp(v_(v(went)))))))",
+        "[pret(e/1),go(e/1,x/1),boys(x/1)]"
 end
 
 reject 'Max live.'
 
-reject 'The boy live.'
+reject 'The boy go.'
 
-reject 'The boys lives.'
+reject 'The boy going.'
+
+reject 'The boy gone.'
+
+reject 'The boys goes.'
 
 accept 'The boys meet the girl.' do
   parse "cp(c_(ip(dp(d_(d(the),np(n_(n(boys))))),i_(i(pres),vp(v_(v(meet),dp(d_(d(the),np(n_(n(girl)))))))))))",
