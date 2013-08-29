@@ -366,11 +366,12 @@ vt(_, Tns, Sub, v(t/N), LF) --> cstack_pop(verb, LF, N, Tns/Sub).
 
 vp(Agr, Tns, Lbd, vp(V_), LF) --> v_(Agr, Tns, Lbd, V_, LF).
 
-vp(Agr, Tns, Lbd@E@X, vp(v_(v(N/v), vp(Spec, V_))), E:[LF1, LF2]) --> event(E),
+vp(Agr, Tns, Lbd@E@X, VP, E:[LF1, LF2]) --> event(E),
   { c_incr(N) },
   v(Agr, Tns, Sub, v(V), Lbd),
   vc(Sub, E, X, Spec, Comp, LF1),
-  vv(v_(v(V/N), Comp), E, V_, LF2).
+  vv(v_(v(V/N), Comp), E, V_, LF2),
+  { xp(v, N/v, vp(Spec, V_), VP) }.
 
 
 %% v_(?Agr, ?Tns, -Vld, -T, -LF)
