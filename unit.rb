@@ -75,3 +75,4 @@ end
 
 test 'fragment'
 test 'agreement'
+test 'theta'
