@@ -6,8 +6,7 @@ require 'rubygems'
 require 'fiber'
 require 'colorize'
 
-prolog = ARGV.shift
-abort 'Usage: test.rb grammar-file' if prolog.nil?
+prolog = ARGV.shift || 'dcg.pl'
 
 LOADF = "use_module(#{File.basename(prolog, '.pl')})"
 

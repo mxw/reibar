@@ -150,8 +150,7 @@ end
 #
 
 # Shift the Prolog file.
-prolog = ARGV.shift
-abort 'Usage: parse.rb grammar-file' if prolog.nil?
+prolog = ARGV.shift || 'dcg.pl'
 
 # Get input from user.
 print 'Sentence: '
