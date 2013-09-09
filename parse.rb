@@ -177,6 +177,7 @@ trees, lfs = IO.popen(swipl, :err => [:child, :out]) do |io|
 
   trees.map! do |s|
     # Simplify DP's.
+    s.gsub!(/dp\(d_\(d\(([\w\/. ]+)\)\)\)/, '*dp(\1)')
     s.gsub!(/dp\(d_\(np\(n_\(n\(([\w\/. ]+)\)\)\)\)\)/, '*dp(\1)')
     s.gsub!(/dp\(d_\(d\(([\w\/. ]+)\),\s*np\(n_\(n\(([\w\/. ]+)\)\)\)\)\)/, '*dp(\1 \2)')
 

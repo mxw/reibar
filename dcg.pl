@@ -471,7 +471,7 @@ pos(Pos, X/Spec, Y/NP, dp(Spec, d_(d(Pos), NP)), Lbd@X@Y) --> [Pos],
 %
 % Determiner bar.
 
-d_(Agr, Role, [], d_(np(n_(N))), X:[]) --> pn(Agr, Case, N, X), {role(Case, Role)}.
+d_(Agr, Role, [], d_(D), X:[]) --> pn(Agr, Case, D, X), {role(Case, Role)}.
 d_(Agr, _, Pos, d_(np(n_(N))), X:[]) --> pr(Agr, Pos, N, X).
 d_(Agr, _, Pos, d_(D, NP), LF) --> d(Agr, D, _), np(Agr, Pos, NP, LF).
 
@@ -747,11 +747,11 @@ role(refl, obj).
 %
 % Personal pronouns.
 
-pn(Agr, nom,  n(N), N) --> [N], {pro(Agr, N, _, _, _, _)}.
-pn(Agr, obl,  n(N), N) --> [N], {pro(Agr, _, N, _, _, _)}.
-pn(Agr, pos,  n(N), N) --> [N], {pro(Agr, _, _, N, _, _)}.
-pn(Agr, gpn,  n(N), N) --> [N], {pro(Agr, _, _, _, N, _)}.
-pn(Agr, refl, n(N), N) --> [N], {pro(Agr, _, _, _, _, N)}.
+pn(Agr, nom,  d(N), N) --> [N], {pro(Agr, N, _, _, _, _)}.
+pn(Agr, obl,  d(N), N) --> [N], {pro(Agr, _, N, _, _, _)}.
+pn(Agr, pos,  d(N), N) --> [N], {pro(Agr, _, _, N, _, _)}.
+pn(Agr, gpn,  d(N), N) --> [N], {pro(Agr, _, _, _, N, _)}.
+pn(Agr, refl, d(N), N) --> [N], {pro(Agr, _, _, _, _, N)}.
 
   pro(sg/1, i,    me,   my,     mine,   myself).
   pro(sg/2, you,  you,  your,   yours,  yourself).
