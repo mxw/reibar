@@ -56,7 +56,7 @@ def sentence(s, success, &blk)
   puts "#{success}: ".green + s
 end
 
-def parse(syn, sem); Fiber.yield(syn, sem); end
+def as(pair); Fiber.yield(*pair.split); end
 
 def accept(s, &blk); sentence s, "ACCEPTED", &blk; end
 def reject(s); sentence s, "REJECTED" do; end; end
