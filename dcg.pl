@@ -296,7 +296,7 @@ mp(_, Tns, Vld, MP, E:[Lbd@E@E_ | LF]) --> event(E),
 
 mc(Vld, PerfP, LF) --> perfp(_, infin, Vld, PerfP, LF).
 mc(Vld, ProgP, LF) --> progp(_, infin, Vld, ProgP, LF).
-mc(Vld, VP, LF) --> vp(_, infin, Vld, VP, LF).
+mc(Vld, VP, LF) --> vpn(_, infin, Vld, VP, LF).
 
 
 %% Perfective aspect.
@@ -315,7 +315,7 @@ perfp(_, Tns, Vld, PerfP, E:[Lbd@E@E_ | LF]) --> event(E),
   { xp(perf, t/N, PerfC, PerfP) }.
 
 perfc(Vld, ProgP, LF) --> progp(_, pastp, Vld, ProgP, LF).
-perfc(Vld, VP, LF) --> vp(_, pastp, Vld, VP, LF).
+perfc(Vld, VP, LF) --> vpn(_, pastp, Vld, VP, LF).
 
 
 %% Progressive aspect.
@@ -324,12 +324,12 @@ perfc(Vld, VP, LF) --> vp(_, pastp, Vld, VP, LF).
 
 progp(Agr, Tns, Vld, ProgP, E:[Lbd@E@E_ | LF]) --> event(E),
   aux(Agr, Tns, prog, Aux, Lbd),
-  vp(_, presp, Vld, VP, E_:LF),
+  vpn(_, presp, Vld, VP, E_:LF),
   { xp(prog, Aux, VP, ProgP) }.
 
 progp(_, Tns, Vld, ProgP, E:[Lbd@E@E_ | LF]) --> event(E),
   cstack_pop(aux, Lbd, N, Tns/prog),
-  vp(_, presp, Vld, VP, E_:LF),
+  vpn(_, presp, Vld, VP, E_:LF),
   { xp(prog, t/N, VP, ProgP) }.
 
 
@@ -339,11 +339,11 @@ progp(_, Tns, Vld, ProgP, E:[Lbd@E@E_ | LF]) --> event(E),
 
 dsup(Agr, Do, Tns, Vld, VP, LF) -->
   aux(Agr, Tns, dsup, Do, _),
-  vp(_, infin, Vld, VP, LF).
+  vpn(_, infin, Vld, VP, LF).
 
 dsup(_, t/N, Tns, Vld, VP, LF) -->
   cstack_pop(aux, _, N, Tns/dsup),
-  vp(_, infin, Vld, VP, LF).
+  vpn(_, infin, Vld, VP, LF).
 
 
 %------------------------------------------------------------------------------
@@ -372,6 +372,14 @@ vp(Agr, Tns, Lbd@E@X, VP, E:[LF1, LF2]) --> event(E),
   vc(Sub, E, X, Spec, Comp, LF1),
   vv(v_(v(V/N), Comp), E, V_, LF2),
   { xp(v, N/v, vp(Spec, V_), VP) }.
+
+
+%% vpn(?Agr, ?Tns, -Vld, -T, -LF)
+%
+% Verb phrase or nil.
+
+vpn(Agr, Tns, Lbd, VP, LF) --> vp(Agr, Tns, Lbd, VP, LF).
+vpn(_, _, x^'AGENT'@E@x, vp([]), E:[]) --> [], event(E).
 
 
 %% v_(?Agr, ?Tns, -Vld, -T, -LF)
