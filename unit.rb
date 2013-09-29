@@ -29,6 +29,46 @@ LOADF = "use_module(#{File.basename(prolog, '.pl')})"
 
 ###############################################################################
 #
+#  Errors.
+#
+
+module UnitError
+  def self.register(type, sentence, line)
+    @errs ||= []
+    @errs << [type, sentence, line]
+
+    output type, sentence, line
+  end
+
+  def self.output(type, sentence, data)
+    case type
+    when :syn
+      puts "SYNTAX ERROR:".red, "  #{sentence}", "  #{data}"
+    when :sem
+      puts "SEMANTICS ERROR:".red, "  #{sentence}", "  #{data}"
+    when :extra
+      puts "EXTRANEOUS PARSES for ".red + sentence + ":".red
+      data.each { |l| puts "  #{l}" }
+    else
+      abort 'FATAL: Unknown error type.'
+    end
+  end
+
+  def self.output_all
+    if @errs.nil?
+      puts " ALL TESTS PASSED ".colorize(color: :white, background: :green)
+    else
+      puts " TESTS FAILED ".colorize(color: :white, background: :red)
+      puts ''
+    end
+
+    @errs.each { |err| output(*err) }
+  end
+end
+
+
+###############################################################################
+#
 #  Basic testing DSL.
 #
 
@@ -55,21 +95,20 @@ def sentence(s, success, opts, &blk)
     begin
       syntax.delete_at(syntax.index(syn))
     rescue TypeError
-      puts "SYNTAX ERROR:".red, "  #{s}", "  #{syn}"
+      UnitError.register(:syn, s, syn)
       return
     end
 
     begin
       semantics.delete_at(semantics.index(sem))
     rescue TypeError
-      puts "SEMANTICS ERROR:".red, "  #{s}", "  #{sem}"
+      UnitError.register(:sem, s, sem)
       return
     end
   end
 
   if not syntax.empty?
-    puts "EXTRANEOUS PARSES for ".red + s + ":".red
-    syntax.each { |l| puts "  #{l}" }
+    UnitError.register(:extra, s, syntax)
     return
   end
 
@@ -97,3 +136,5 @@ test 'fragment'
 test 'agreement'
 test 'theta'
 test 'mode-aspect'
+
+UnitError.output_all
