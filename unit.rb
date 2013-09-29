@@ -3,8 +3,24 @@
 #
 
 require 'rubygems'
-require 'fiber'
 require 'colorize'
+require 'fiber'
+require 'optparse'
+require 'ostruct'
+
+@options = OpenStruct.new
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: ruby unit.rb [options] [grammar-file]"
+
+  opts.on("-v", "--verbose", "Run verbosely") do |o|
+    @options.verbose = o
+  end
+
+  opts.on("-a", "--all", "Run all tests") do |o|
+    @options.all = o
+  end
+end.parse!
 
 prolog = ARGV.shift || 'dcg.pl'
 
@@ -16,7 +32,7 @@ LOADF = "use_module(#{File.basename(prolog, '.pl')})"
 #  Basic testing DSL.
 #
 
-def sentence(s, success, &blk)
+def sentence(s, success, opts, &blk)
   fiber = Fiber.new &blk
 
   words = s.downcase.strip.gsub('.', '').split(/('s)\s+|(')\s+|\s+/)
@@ -36,12 +52,16 @@ def sentence(s, success, &blk)
   while fiber.alive? && (out = fiber.resume) do
     syn, sem = out
 
-    if not syntax.delete syn
+    begin
+      syntax.delete_at(syntax.index(syn))
+    rescue TypeError
       puts "SYNTAX ERROR:".red, "  #{s}", "  #{syn}"
       return
     end
 
-    if not semantics.delete sem
+    begin
+      semantics.delete_at(semantics.index(sem))
+    rescue TypeError
       puts "SEMANTICS ERROR:".red, "  #{s}", "  #{sem}"
       return
     end
@@ -53,13 +73,13 @@ def sentence(s, success, &blk)
     return
   end
 
-  puts "#{success}: ".green + s
+  puts "#{success}: ".green + s unless opts[:quiet]
 end
 
-def as(pair); Fiber.yield(*pair.split); end
+def as(pair); Fiber.yield(*pair.split(/\s*\n\s*/)); end
 
-def accept(s, &blk); sentence s, "ACCEPTED", &blk; end
-def reject(s); sentence s, "REJECTED" do; end; end
+def accept(s, &blk);      sentence s, "ACCEPTED", {}, &blk; end
+def reject(s, opts = {}); sentence s, "REJECTED", opts do; end; end
 
 def test(s)
   puts "+--[#{s}]".upcase.blue
@@ -76,3 +96,4 @@ end
 test 'fragment'
 test 'agreement'
 test 'theta'
+test 'mode-aspect'

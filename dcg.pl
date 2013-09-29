@@ -336,12 +336,17 @@ progp(_, Tns, Vld, ProgP, E:[Lbd@E@E_ | LF]) --> event(E),
 %% Do-support.
 %
 % dsup(?Agr, ?Tns, -Tld, -Vld, -T, -LF)   Fill `do' into Tns.
+%
+% We check for finiteness here (in addition to further up the stack) because we
+% lose some tense information by passing the form of `do'.
 
 dsup(Agr, Do, Tns, Vld, VP, LF) -->
+  { finite(Tns) },
   aux(Agr, Tns, dsup, Do, _),
   vpn(_, infin, Vld, VP, LF).
 
 dsup(_, t/N, Tns, Vld, VP, LF) -->
+  { finite(Tns) },
   cstack_pop(aux, _, N, Tns/dsup),
   vpn(_, infin, Vld, VP, LF).
 
@@ -602,7 +607,7 @@ a(a(A), x^A@x) --> [A], {adj(A)}.
 
 finite(pres).
 finite(pret).
-finite(Do) :- aux(_, Tns, dsup, Do, _, _, _), finite(Tns).
+finite(Do) :- aux(_, Tns, dsup, Do, _, _, _), finite(Tns), !.
 
 %% aspect(?Gov)
 %
@@ -633,7 +638,7 @@ aux(Agr, Tns, prog, X, Lbd) --> v(Agr, Tns, prog, aux, v(X), Lbd).
 aux(Agr, Tns, perf, X, Lbd) --> v(Agr, Tns, perf, aux, v(X), Lbd).
 aux(Agr, Tns, dsup, X, Lbd) --> v(Agr, Tns, dsup, aux, v(X), Lbd).
 aux(_/_, pres, mod, X, Lbd) --> [X], {modal(X, _), v_scf(X, [aux], aux, Lbd)}.
-aux(_/_, pret, mod, X, Lbd) --> [X], {modal(_, X), v_scf(X, [aux], aux, Lbd)}.
+aux(_/_, pret, mod, X, Lbd) --> [X], {modal(Y, X), v_scf(Y, [aux], aux, Lbd)}.
 
   modal(can, could).
   modal(may, might).
@@ -662,11 +667,11 @@ v(Agr, Tns, prog, Sub, v(V), Lbd) --> [V], {b(Agr, Tns, V), b_scf(V, Sub, Lbd)}.
   b(sg/3, pret,  was).
   b(pl/_, pret,  were).
 
-b_scf(_, aux, _).
+b_scf(_, aux, z^x^be@z@x).
 b_scf(_, nil, x^x).
 b_scf(_, a,   x^y^x@y).
 b_scf(_, pp,  x^y^x@y).
-b_scf(V, np,  x^y^V@y@x).
+b_scf(_, np,  x^y^be@y@x).
 
 
 %% v(?Agr, ?Tns, ?Gov, ?Sub, -T, -Lbd)
